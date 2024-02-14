@@ -1,8 +1,11 @@
 package com.evest.menu.presentation
 
+import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.evest.menu.R
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,19 +28,28 @@ class MenuViewModel(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MenuState())
 
+    private val applicationContext = getApplication<Application>().applicationContext
+
+    @SuppressLint("WearRecents")
     @OptIn(DelicateCoroutinesApi::class)
     fun onEvent(event: MenuEvent) {
         when (event) {
             is MenuEvent.FetchMenu -> {
-                if (event.initialFetch && _state.value.wereDataFetched) {
+                if (
+                    (event.initialFetch && _state.value.wereDataFetched) ||
+                    (event.initialFetch && _state.value.status == "error")
+                ) {
                     return
                 }
                 GlobalScope.launch {
                     _state.update {
-                        it.copy(isFetchingData = true)
+                        it.copy(
+                            isFetchingData = true,
+                            status = "loading"
+                        )
                     }
                     try {
-                        fetchMenu(dao, getApplication<Application>().applicationContext)
+                        fetchMenu(dao, applicationContext)
                         if (event.initialFetch) {
                             _state.update {
                                 it.copy(wereDataFetched = true)
@@ -48,6 +60,12 @@ class MenuViewModel(
                             it.copy(status = "loaded")
                         }
                     } catch (_: Throwable) {
+                        startConfirmation(
+                            applicationContext, applicationContext.resources.getString(
+                                R.string.error_fetching
+                            ), "error"
+                        )
+
                         _state.update {
                             it.copy(status = "error")
                         }
@@ -60,12 +78,35 @@ class MenuViewModel(
 
             MenuEvent.ClearDatabase -> {
                 viewModelScope.launch {
-                    dao.clearMenu()
-                    dao.clearItem()
-                    dao.clearMeal()
-                    dao.clearAllergen()
-                    dao.clearMealAllergenCrossRef()
+                    try {
+                        dao.clearMenu()
+                        dao.clearItem()
+                        dao.clearMeal()
+                        dao.clearAllergen()
+                        dao.clearMealAllergenCrossRef()
+
+                        startConfirmation(
+                            applicationContext, applicationContext.resources.getString(
+                                R.string.database_cleared
+                            )
+                        )
+                    } catch (_: Throwable) {
+                        startConfirmation(
+                            applicationContext, applicationContext.resources.getString(
+                                R.string.database_clear_error
+                            ), "error"
+                        )
+                    }
                 }
+            }
+
+            is MenuEvent.OpenAlert -> {
+                val intent = Intent(applicationContext, AlertActivity::class.java)
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.putExtra("ACTION_NAME", event.actionName)
+                intent.putExtra("TITLE_TEXT", event.titleText)
+                intent.putExtra("MESSAGE", event.message)
+                applicationContext.startActivity(intent)
             }
         }
     }

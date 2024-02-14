@@ -14,4 +14,11 @@
     <string name="other">Ostatní</string>
     <string name="clear_database">Vymazat Databázi</string>
     <string name="error">Chyba</string>
+    <string name="no_internet">Není k dispozici internet</string>
+    <string name="error_fetching">Nepodařilo se načíst data</string>
+    <string name="database_cleared">Databáze vymazána</string>
+    <string name="database_clear_error">Chyba při mazání databáze</string>
+    <string name="cancel">Zrušit</string>
+    <string name="confirm">Potvrdit</string>
+    <string name="are_you_sure">Jste si jistí?</string>
 </resources>

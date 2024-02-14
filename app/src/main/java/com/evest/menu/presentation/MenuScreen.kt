@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SignalWifiConnectedNoInternet4
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -67,21 +68,32 @@ fun MenuListItem(menuWithItems: MenuWithItems, state: MenuState) {
                 ) else it.toString()
             }
 
+    val titleCardDate = getDayMonth(menuWithItems.menu.date)
+
+    val preferences =
+        context.getSharedPreferences(Preference.MenuPreference.name, Context.MODE_PRIVATE)
+
+    val filteredMenuWithItems =
+        menuWithItems.items.filter { preferences.getBoolean("display_${it.type}", true) }
+
+    if (filteredMenuWithItems.isEmpty()) {
+        return
+    }
+
     TitleCard(
         onClick = {},
         title = { Text(weekDay) },
+        time = {
+            Text(titleCardDate)
+        }
     ) {
-        val preferences =
-            context.getSharedPreferences(Preference.MenuPreference.name, Context.MODE_PRIVATE)
-
-        menuWithItems.items.filter { preferences.getBoolean("display_${it.type}", true) }
-            .forEach { item ->
-                val meal = state.mealList.find { it.mealId == item.mealId }
-                val mealLabel = stringResource(getMealTypeLabel(item.type)!!)
-                meal?.let {
-                    Text("$mealLabel - ${meal.name}")
-                }
+        filteredMenuWithItems.forEach { item ->
+            val meal = state.mealList.find { it.mealId == item.mealId }
+            val mealLabel = stringResource(getMealTypeLabel(item.type)!!)
+            meal?.let {
+                Text("$mealLabel - ${meal.name}")
             }
+        }
     }
 }
 
@@ -117,6 +129,8 @@ fun MenuScreen(navController: NavHostController) {
             val focusRequester = rememberActiveFocusRequester()
             val coroutineScope = rememberCoroutineScope()
             val hasInternet = isInternetAvailable(context)
+
+
 
             ScalingLazyColumn(
                 modifier = Modifier
@@ -162,7 +176,16 @@ fun MenuScreen(navController: NavHostController) {
                         }
 
                         if (state.menuWithItemsList.isEmpty() && !hasInternet) {
-                            Text("No Internet Connection")
+                            Row(
+                                Modifier.fillMaxWidth(0.9f),
+                                horizontalArrangement = Arrangement.SpaceAround
+                            ) {
+                                Icon(
+                                    Icons.Default.SignalWifiConnectedNoInternet4,
+                                    stringResource(R.string.no_internet)
+                                )
+                                Text(stringResource(R.string.no_internet))
+                            }
                         }
                         if (state.status == "error") {
                             Row(
@@ -174,7 +197,10 @@ fun MenuScreen(navController: NavHostController) {
                                     stringResource(R.string.error),
                                     tint = MaterialTheme.colors.error
                                 )
-                                Text("Error Fetching Data", color = MaterialTheme.colors.error)
+                                Text(
+                                    stringResource(R.string.error_fetching),
+                                    color = MaterialTheme.colors.error
+                                )
                             }
                         }
                     }

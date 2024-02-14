@@ -13,4 +13,11 @@
     <string name="other">Other</string>
     <string name="clear_database">Clear Database</string>
     <string name="error">Error</string>
+    <string name="no_internet">No Internet connection</string>
+    <string name="error_fetching">Error fetching data</string>
+    <string name="database_cleared">Database cleared</string>
+    <string name="database_clear_error">Error while clearing database</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="are_you_sure">Are you sure?</string>
 </resources>

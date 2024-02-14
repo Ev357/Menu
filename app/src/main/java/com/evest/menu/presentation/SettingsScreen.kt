@@ -221,7 +221,13 @@ fun SettingsScreen() {
                                     .fillMaxWidth(0.9f)
                                     .height(40.dp),
                                 onClick = {
-                                    viewModel.onEvent(MenuEvent.ClearDatabase)
+                                    viewModel.onEvent(
+                                        MenuEvent.OpenAlert(
+                                            "clear_database",
+                                            context.resources.getString(R.string.clear_database),
+                                            context.resources.getString(R.string.are_you_sure)
+                                        )
+                                    )
                                 },
                                 label = {
                                     Text(stringResource(R.string.clear_database))
