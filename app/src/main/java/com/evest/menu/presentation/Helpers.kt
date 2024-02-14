@@ -35,6 +35,17 @@ fun formatText(text: String): String {
         .run { if (endsWith('.')) this else "$this." }
 }
 
+fun getMealType(string: String): String? {
+    return when (string) {
+        "Snídaně" -> "breakfast"
+        "Polévka" -> "soup"
+        "Oběd1" -> "lunch1"
+        "Oběd2" -> "lunch2"
+        "Večeře" -> "dinner"
+        else -> null
+    }
+}
+
 fun getMealTypeLabel(string: String): Int? {
     return when (string) {
         "breakfast" -> R.string.breakfast
@@ -74,4 +85,17 @@ fun getDayMonth(date: LocalDate): String {
     val month = capitalize(DateTimeFormatter.ofPattern("MMM").format(date))
 
     return "$day $month"
+}
+
+fun getNewestOldestDateString(dateStringList: List<String>): Pair<String, String> {
+    return dateStringList.fold("" to "") { acc, dateString ->
+        acc.let { (currentOldest, currentNewest) ->
+            val currentDate = LocalDate.parse(dateString)
+            val newOldest =
+                if (currentOldest.isEmpty() || currentDate < LocalDate.parse(currentOldest)) dateString else currentOldest
+            val newNewest =
+                if (currentNewest.isEmpty() || currentDate > LocalDate.parse(currentNewest)) dateString else currentNewest
+            newOldest to newNewest
+        }
+    }
 }

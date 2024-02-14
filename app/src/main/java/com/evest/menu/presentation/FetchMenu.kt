@@ -31,36 +31,53 @@ suspend fun fetchMenu(dao: MenuDao, context: Context) {
         return
     }
 
-    dayMenuElements.forEach { dayMenuElement ->
-        run {
-            val dateString = dayMenuElement.getElementsByClass("jidelnicekTop")
-                .attr("id")
-            if (dateString.isNullOrEmpty()) {
-                return
-            }
-
-            val formatter = DateTimeFormatter.ofPattern("'day'-yyyy-MM-dd")
-            val date = LocalDate.parse(dateString, formatter)
-
-            val mealContainers = dayMenuElement.getElementsByClass("container")
-            if (mealContainers.isNullOrEmpty()) {
-                return
-            }
-
-            val mealList = mealContainers.mapNotNull { createMeal(it, dao) }
-
-            var menuId = dao.upsertMenu(Menu(date))
-            if (menuId.toInt() == -1) {
-                val newMenuId = dao.getMenuByDate(date)?.menuId
-                if (newMenuId == null || newMenuId.toInt() == -1) {
-                    return
-                }
-                menuId = newMenuId
-            }
-
-            mealList.forEach { dao.upsertItem(Item(it.second, menuId, it.first)) }
+    val menuDateStringList = dayMenuElements.mapNotNull { dayMenuElement ->
+        val dateString = dayMenuElement.getElementsByClass("jidelnicekTop")
+            .attr("id")
+        if (dateString.isNullOrEmpty()) {
+            return
         }
+
+        val formatter = DateTimeFormatter.ofPattern("'day'-yyyy-MM-dd")
+        val date = LocalDate.parse(dateString, formatter)
+
+        val mealContainers = dayMenuElement.getElementsByClass("container")
+        if (mealContainers.isNullOrEmpty()) {
+            return
+        }
+
+        val mealList = mealContainers.mapNotNull { createMeal(it, dao) }
+
+        var menuId = dao.upsertMenu(Menu(date))
+        if (menuId.toInt() == -1) {
+            val newMenuId = dao.getMenu(date)?.menuId
+            if (newMenuId == null || newMenuId.toInt() == -1) {
+                return
+            }
+            menuId = newMenuId
+        }
+
+        val mealTypeList = mealList.map { it.second }
+
+        dao.deleteRemovedItems(menuId, mealTypeList)
+
+        mealList.forEach {
+            val itemId = dao.upsertItem(Item(it.second, menuId, it.first))
+            if (itemId.toInt() == -1) {
+                dao.updateMenuItem(menuId, it.second, it.first)
+            }
+        }
+
+        DateTimeFormatter.ofPattern("yyyy-MM-dd").format(date)
     }
+
+    if (menuDateStringList.isEmpty()) {
+        return
+    }
+
+    val (newestDateString, oldestDateString) = getNewestOldestDateString(menuDateStringList)
+
+    dao.deleteRemovedMenu(newestDateString, oldestDateString, menuDateStringList)
 }
 
 suspend fun createMeal(menuItemElement: Element, dao: MenuDao): Pair<Long, String>? {
@@ -80,7 +97,7 @@ suspend fun createMeal(menuItemElement: Element, dao: MenuDao): Pair<Long, Strin
 
     var mealId = dao.upsertMeal(Meal(mealName))
     if (mealId.toInt() == -1) {
-        val newMealId = dao.getMealByName(mealName)?.mealId
+        val newMealId = dao.getMeal(mealName)?.mealId
         if (newMealId == null || newMealId.toInt() == -1) {
             return null
         }
@@ -99,15 +116,4 @@ suspend fun createMeal(menuItemElement: Element, dao: MenuDao): Pair<Long, Strin
     }
 
     return mealId to mealType
-}
-
-fun getMealType(string: String): String? {
-    return when (string) {
-        "Snídaně" -> "breakfast"
-        "Polévka" -> "soup"
-        "Oběd1" -> "lunch1"
-        "Oběd2" -> "lunch2"
-        "Večeře" -> "dinner"
-        else -> null
-    }
 }

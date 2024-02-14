@@ -29,10 +29,10 @@ interface MenuDao {
     suspend fun upsertAllergen(allergen: Allergen): Long
 
     @Upsert
-    suspend fun upsertMealAllergenCrossRef(crossRef: MealAllergenCrossRef)
+    suspend fun upsertMealAllergenCrossRef(crossRef: MealAllergenCrossRef): Long
 
     // Queries
-    @Query("SELECT * FROM menu")
+    @Query("SELECT * FROM menu WHERE date(date) >= date(\"now\")")
     fun getMenuWithItems(): Flow<List<MenuWithItems>>
 
     @Query("SELECT * FROM meal")
@@ -40,11 +40,30 @@ interface MenuDao {
 
     @Transaction
     @Query("SELECT * FROM menu WHERE date = :date")
-    suspend fun getMenuByDate(date: LocalDate): Menu?
+    suspend fun getMenu(date: LocalDate): Menu?
 
     @Transaction
     @Query("SELECT * FROM meal WHERE name = :name")
-    suspend fun getMealByName(name: String): Meal?
+    suspend fun getMeal(name: String): Meal?
+
+    @Transaction
+    @Query("UPDATE item SET mealId = :mealId, state = :state WHERE menuId = :menuId AND type = :type")
+    suspend fun updateMenuItem(menuId: Long, type: String, mealId: Long, state: String = "unknown")
+
+    @Transaction
+    @Query("DELETE FROM menu WHERE date(date) > date(:startDateString) AND date(date) < date(:endDateString) AND date NOT IN (:menuDateStringList)")
+    suspend fun deleteRemovedMenu(
+        startDateString: String,
+        endDateString: String,
+        menuDateStringList: List<String>
+    )
+
+    @Transaction
+    @Query("DELETE FROM item WHERE menuId = :menuId AND type NOT IN (:mealTypeList)")
+    suspend fun deleteRemovedItems(
+        menuId: Long,
+        mealTypeList: List<String>
+    )
 
     // Clear
     @Transaction
