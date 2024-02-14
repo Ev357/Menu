@@ -1,7 +1,7 @@
 package com.evest.menu.presentation
 
 import android.content.Context
-import entities.relations.ItemAndMealAndLoggedItem
+import entities.relations.ItemAndRelations
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 
 suspend fun postData(
     context: Context,
-    itemAndRelations: ItemAndMealAndLoggedItem,
+    itemAndRelations: ItemAndRelations,
     dao: MenuDao
 ) {
     val serverPreferences =
@@ -47,7 +47,7 @@ suspend fun postData(
 
 suspend fun parseMenuListHtml(
     html: String,
-    itemAndRelations: ItemAndMealAndLoggedItem,
+    itemAndRelations: ItemAndRelations,
     dao: MenuDao,
     url: String,
     jSessionId: String,
@@ -75,7 +75,7 @@ suspend fun parseMenuListHtml(
 
 suspend fun parseMenuHtml(
     element: Element,
-    itemAndRelations: ItemAndMealAndLoggedItem,
+    itemAndRelations: ItemAndRelations,
     url: String,
     jSessionId: String,
     dao: MenuDao,
@@ -121,7 +121,7 @@ fun findMealElement(mealContainers: Elements, mealType: String): Element? {
     }
 }
 
-fun getOrderType(itemAndRelations: ItemAndMealAndLoggedItem, mealContainers: Elements): String {
+fun getOrderType(itemAndRelations: ItemAndRelations, mealContainers: Elements): String {
     if (itemAndRelations.item.type.startsWith("lunch")) {
         if (itemAndRelations.loggedItem?.isTaken == true) {
             return "delete"

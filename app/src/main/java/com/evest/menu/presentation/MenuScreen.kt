@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.RevealValue
 import androidx.wear.compose.foundation.SwipeToReveal
@@ -58,14 +59,14 @@ import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.SplitToggleChip
 import androidx.wear.compose.material.Text
 import com.evest.menu.R
-import entities.relations.ItemAndMealAndLoggedItem
+import entities.relations.ItemAndRelations
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalWearFoundationApi::class)
 @Composable
-fun MenuScreen(menuId: Long) {
+fun MenuScreen(menuId: Long, navController: NavHostController) {
     val listState = rememberScalingLazyListState(0)
     val context = LocalContext.current
     val dao = MenuDatabase.getInstance(context).dao
@@ -110,7 +111,7 @@ fun MenuScreen(menuId: Long) {
             val menuPreferences =
                 context.getSharedPreferences(Preference.MenuPreference.name, Context.MODE_PRIVATE)
 
-            val filteredItemAndMealAndLoggedItemList =
+            val filteredItemAndRelationsList =
                 state.itemAndMealAndLoggedItemList.filter {
                     menuPreferences.getBoolean(
                         "display_${it.item.type}",
@@ -140,13 +141,13 @@ fun MenuScreen(menuId: Long) {
                 contentPadding = PaddingValues(start = 10.dp)
             ) {
                 itemsIndexed(
-                    filteredItemAndMealAndLoggedItemList,
+                    filteredItemAndRelationsList,
                     { _, (item) -> item.itemId }
-                ) { index, itemAndMealAndLoggedItem ->
+                ) { index, itemAndRelations ->
                     val revealState = rememberRevealState()
                     val scope = rememberCoroutineScope()
                     val allergens =
-                        state.mealWithAllergensList.find { it.meal.mealId == itemAndMealAndLoggedItem.meal.mealId }
+                        state.mealWithAllergensList.find { it.meal.mealId == itemAndRelations.meal.mealId }
 
                     SwipeToReveal(
                         modifier = if (index == 0) Modifier.padding(top = 20.dp) else Modifier,
@@ -188,15 +189,16 @@ fun MenuScreen(menuId: Long) {
                         },
                         state = revealState,
                     ) {
-                        if (isLogged && itemAndMealAndLoggedItem.item.type != "soup") {
+                        if (isLogged && itemAndRelations.item.type != "soup") {
                             LoggedItemChip(
-                                itemAndMealAndLoggedItem,
+                                itemAndRelations,
                                 dao,
                                 viewModel::onEvent,
-                                hasInternet
+                                hasInternet,
+                                navController
                             )
                         } else {
-                            ItemChip(itemAndMealAndLoggedItem)
+                            ItemChip(itemAndRelations)
                         }
                     }
                 }
@@ -208,15 +210,16 @@ fun MenuScreen(menuId: Long) {
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun LoggedItemChip(
-    itemAndMealAndLoggedItem: ItemAndMealAndLoggedItem,
+    itemAndRelations: ItemAndRelations,
     dao: MenuDao,
     onEvent: (MenuEvent) -> Unit,
-    hasInternet: Boolean
+    hasInternet: Boolean,
+    navController: NavHostController
 ) {
     val context = LocalContext.current
-    val mealLabel = stringResource(getMealTypeLabel(itemAndMealAndLoggedItem.item.type)!!)
+    val mealLabel = stringResource(getMealTypeLabel(itemAndRelations.item.type)!!)
     var checked by mutableStateOf(
-        itemAndMealAndLoggedItem.loggedItem?.isTaken == true
+        itemAndRelations.loggedItem?.isTaken == true
     )
     var isLoading by remember {
         mutableStateOf(false)
@@ -230,7 +233,7 @@ fun LoggedItemChip(
             Text(mealLabel)
         },
         secondaryLabel = {
-            Text(itemAndMealAndLoggedItem.meal.name)
+            Text(itemAndRelations.meal.name)
         },
         checked = checked,
         toggleControl = {
@@ -241,19 +244,19 @@ fun LoggedItemChip(
                     strokeWidth = 2.dp
                 )
             } else {
-                if (itemAndMealAndLoggedItem.loggedItem?.state != "not_allowed") {
+                if (itemAndRelations.loggedItem?.state != "not_allowed") {
                     Checkbox(
                         checked = checked,
-                        enabled = itemAndMealAndLoggedItem.loggedItem?.state != "over" && hasInternet,
+                        enabled = itemAndRelations.loggedItem?.state != "over" && hasInternet,
                         onCheckedChange = {
                             scope.launch {
                                 try {
                                     isLoading = true
                                     val job = GlobalScope.launch {
-                                        postData(context, itemAndMealAndLoggedItem, dao)
+                                        postData(context, itemAndRelations, dao)
                                     }
                                     job.join()
-                                    onEvent(MenuEvent.UpdateLoggedItems(itemAndMealAndLoggedItem.item.menuId))
+                                    onEvent(MenuEvent.UpdateLoggedItems(itemAndRelations.item.menuId))
                                 } catch (e: Throwable) {
                                     e.printStackTrace()
                                     startConfirmation(
@@ -273,15 +276,15 @@ fun LoggedItemChip(
             }
         },
         onCheckedChange = { checked = it },
-        onClick = { checked = !checked },
+        onClick = { navController.navigate(Screen.MealScreen.withArgs(itemAndRelations.item.itemId)) },
         enabled = true,
         shape = MaterialTheme.shapes.large
     )
 }
 
 @Composable
-fun ItemChip(itemAndMealAndLoggedItem: ItemAndMealAndLoggedItem) {
-    val mealLabel = stringResource(getMealTypeLabel(itemAndMealAndLoggedItem.item.type)!!)
+fun ItemChip(itemAndRelations: ItemAndRelations) {
+    val mealLabel = stringResource(getMealTypeLabel(itemAndRelations.item.type)!!)
 
     Chip(
         modifier = Modifier.fillMaxWidth(0.95f),
@@ -289,7 +292,7 @@ fun ItemChip(itemAndMealAndLoggedItem: ItemAndMealAndLoggedItem) {
             Text(mealLabel)
         },
         secondaryLabel = {
-            Text(itemAndMealAndLoggedItem.meal.name)
+            Text(itemAndRelations.meal.name)
         },
         shape = MaterialTheme.shapes.large,
         colors = ChipDefaults.secondaryChipColors(),

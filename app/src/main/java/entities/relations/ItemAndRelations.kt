@@ -6,7 +6,7 @@ import entities.Item
 import entities.LoggedItem
 import entities.Meal
 
-data class ItemAndMealAndLoggedItem(
+data class ItemAndRelations(
     @Embedded val item: Item,
     @Relation(
         parentColumn = "mealId",

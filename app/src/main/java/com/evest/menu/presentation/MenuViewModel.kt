@@ -157,6 +157,20 @@ class MenuViewModel(
                     }
                 }
             }
+
+            is MenuEvent.GetItem -> {
+                viewModelScope.launch {
+                    val itemAndRelations = dao.getSingleItemAndRelations(event.itemId)
+                    val mealWithAllergens =
+                        dao.getMealWithAllergensById(itemAndRelations.meal.mealId)
+                    _state.update {
+                        it.copy(
+                            itemAndRelations = itemAndRelations,
+                            mealWithAllergens = mealWithAllergens
+                        )
+                    }
+                }
+            }
         }
     }
 }

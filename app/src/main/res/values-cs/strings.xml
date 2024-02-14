@@ -30,4 +30,10 @@
     <string name="logged_as">Přihlášen jako</string>
     <string name="login_successful">Úspěšně přihlášen</string>
     <string name="login_failed">Přihlášení selhalo</string>
+    <string name="dispensing_from">Výdej od</string>
+    <string name="to">do</string>
+    <string name="order_by">Objednat do</string>
+    <string name="cancel_by">Zrušit do</string>
+    <string name="order_info">Objednávání</string>
+    <string name="allergens">Alergeny</string>
 </resources>

@@ -29,4 +29,10 @@
     <string name="logged_as">Logged as</string>
     <string name="login_successful">Logged In Successfuly</string>
     <string name="login_failed">Login Failed</string>
+    <string name="dispensing_from">Dispensing from</string>
+    <string name="to">To</string>
+    <string name="order_by">Order by</string>
+    <string name="cancel_by">Cancel by</string>
+    <string name="order_info">Order info</string>
+    <string name="allergens">Allergens</string>
 </resources>

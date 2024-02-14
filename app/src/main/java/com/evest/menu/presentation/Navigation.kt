@@ -28,10 +28,20 @@ fun Navigation() {
                 }
             )
         ) { entry ->
-            entry.arguments?.let { MenuScreen(it.getLong("menuId")) }
+            entry.arguments?.let { MenuScreen(it.getLong("menuId"), navController) }
         }
         composable(Screen.LoginScreen.route) {
             LoginScreen(navController)
+        }
+        composable(
+            Screen.MealScreen.route + "/{itemId}",
+            listOf(
+                navArgument("itemId") {
+                    type = NavType.LongType
+                }
+            )
+        ) { entry ->
+            entry.arguments?.let { MealScreen(it.getLong("itemId")) }
         }
     }
 }

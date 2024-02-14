@@ -9,7 +9,7 @@ import entities.Item
 import entities.LoggedItem
 import entities.Meal
 import entities.Menu
-import entities.relations.ItemAndMealAndLoggedItem
+import entities.relations.ItemAndRelations
 import entities.relations.MealAllergenCrossRef
 import entities.relations.MealWithAllergens
 import entities.relations.MenuWithItems
@@ -58,7 +58,11 @@ interface MenuDao {
 
     @Transaction
     @Query("SELECT * FROM item WHERE menuId = :menuId")
-    suspend fun getItemAndMealAndLoggedItemList(menuId: Long): List<ItemAndMealAndLoggedItem>
+    suspend fun getItemAndMealAndLoggedItemList(menuId: Long): List<ItemAndRelations>
+
+    @Transaction
+    @Query("SELECT * FROM item WHERE itemId = :itemId")
+    suspend fun getSingleItemAndRelations(itemId: Long): ItemAndRelations
 
     @Transaction
     @Query("SELECT * FROM item WHERE menuId = :menuId AND type = :mealType")
@@ -67,6 +71,10 @@ interface MenuDao {
     @Transaction
     @Query("SELECT * FROM meal WHERE mealId IN (:mealIdList)")
     suspend fun getMealWithAllergens(mealIdList: List<Long>): List<MealWithAllergens>
+
+    @Transaction
+    @Query("SELECT * FROM meal WHERE mealId = :mealId")
+    suspend fun getMealWithAllergensById(mealId: Long): MealWithAllergens
 
     @Transaction
     @Query("SELECT * FROM meal WHERE name = :name")
