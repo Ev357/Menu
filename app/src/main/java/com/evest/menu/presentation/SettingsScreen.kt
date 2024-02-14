@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -258,6 +259,14 @@ fun SettingsScreen(navController: NavHostController) {
                             )
                         }
                         BasicTextField(
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f)
+                                .border(
+                                    width = 2.dp,
+                                    color = if (URLUtil.isValidUrl(serverAddress)) Color.White else Color.Red,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
                             value = serverAddress,
                             onValueChange = { newText ->
                                 val trimmedNewText = newText.trim()
@@ -266,34 +275,22 @@ fun SettingsScreen(navController: NavHostController) {
                                 }.apply()
                                 serverAddress = trimmedNewText
                             },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(0.9f)
-                                    .border(
-                                        width = 2.dp,
-                                        color = if (URLUtil.isValidUrl(serverAddress)) {
-                                            Color.White
-                                        } else {
-                                            Color.Red
-                                        },
-                                        shape = RoundedCornerShape(16.dp)
+                            textStyle = TextStyle(
+                                fontSize = 16.sp,
+                                color = Color.White
+                            ),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+                            decorationBox = { innerTextField ->
+                                if (serverAddress.isEmpty()) {
+                                    Text(
+                                        text = "https://...",
+                                        fontSize = 16.sp,
+                                        color = if (serverAddress.isEmpty()) Color.LightGray else Color.White
                                     )
-                                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                            ) {
-                                Text(
-                                    serverAddress.ifEmpty {
-                                        "https://..."
-                                    },
-                                    color = if (serverAddress.isEmpty()) {
-                                        Color.Gray
-                                    } else {
-                                        Color.White
-                                    }
-                                )
+                                }
+                                innerTextField()
                             }
-                        }
+                        )
                     }
                 }
                 item {
