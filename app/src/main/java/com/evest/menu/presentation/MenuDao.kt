@@ -8,7 +8,9 @@ import entities.Allergen
 import entities.Item
 import entities.Meal
 import entities.Menu
+import entities.relations.ItemAndMeal
 import entities.relations.MealAllergenCrossRef
+import entities.relations.MealWithAllergens
 import entities.relations.MenuWithItems
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -43,12 +45,32 @@ interface MenuDao {
     suspend fun getMenu(date: LocalDate): Menu?
 
     @Transaction
+    @Query("SELECT * FROM item WHERE menuId = :menuId")
+    suspend fun getItemAndMealList(menuId: Long): List<ItemAndMeal>
+
+    @Transaction
+    @Query("SELECT * FROM meal WHERE mealId IN (:mealIdList)")
+    suspend fun getMealWithAllergens(mealIdList: List<Long>): List<MealWithAllergens>
+
+    @Transaction
     @Query("SELECT * FROM meal WHERE name = :name")
     suspend fun getMeal(name: String): Meal?
 
     @Transaction
-    @Query("UPDATE item SET mealId = :mealId, state = :state WHERE menuId = :menuId AND type = :type")
-    suspend fun updateMenuItem(menuId: Long, type: String, mealId: Long, state: String = "unknown")
+    @Query(
+        "UPDATE item SET mealId = :mealId, state = :state, price = :price, startDispensingTime = :startDispensingTime, endDispensingTime = :endDispensingTime, endOrderTime = :endOrderTime, endCancelTime = :endCancelTime WHERE menuId = :menuId AND type = :type"
+    )
+    suspend fun updateMenuItem(
+        menuId: Long,
+        type: String,
+        mealId: Long,
+        state: String = "unknown",
+        price: Int? = null,
+        startDispensingTime: LocalDate? = null,
+        endDispensingTime: LocalDate? = null,
+        endOrderTime: LocalDate? = null,
+        endCancelTime: LocalDate? = null,
+    )
 
     @Transaction
     @Query("DELETE FROM menu WHERE date(date) > date(:startDateString) AND date(date) < date(:endDateString) AND date NOT IN (:menuDateStringList)")

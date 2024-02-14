@@ -8,6 +8,7 @@ import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import entities.Allergen
 import entities.Item
+import entities.LoggedItem
 import entities.Meal
 import entities.Menu
 import entities.relations.MealAllergenCrossRef
@@ -20,7 +21,8 @@ import java.time.format.DateTimeFormatter
         Item::class,
         Meal::class,
         Allergen::class,
-        MealAllergenCrossRef::class
+        MealAllergenCrossRef::class,
+        LoggedItem::class
     ],
     version = 1,
     exportSchema = false

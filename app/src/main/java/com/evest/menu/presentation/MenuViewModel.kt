@@ -108,6 +108,20 @@ class MenuViewModel(
                 intent.putExtra("MESSAGE", event.message)
                 applicationContext.startActivity(intent)
             }
+
+            is MenuEvent.GetMenu -> {
+                viewModelScope.launch {
+                    val itemAndMealList = dao.getItemAndMealList(event.menuId)
+                    val mealWithAllergensList =
+                        dao.getMealWithAllergens(itemAndMealList.map { it.meal.mealId })
+                    _state.update {
+                        it.copy(
+                            itemAndMealList = itemAndMealList,
+                            mealWithAllergensList = mealWithAllergensList
+                        )
+                    }
+                }
+            }
         }
     }
 }
