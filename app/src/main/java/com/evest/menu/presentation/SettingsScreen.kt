@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
@@ -47,7 +48,7 @@ fun SettingsItem(
     }
     Column {
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            Text(preference.label, fontSize = 20.sp)
+            Text(stringResource(preference.label), fontSize = 20.sp)
         }
         Spacer(Modifier.height(10.dp))
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -114,7 +115,7 @@ fun SettingsScreen() {
                                         isChecked = isNewChecked
                                     },
                                     label = {
-                                        Text(option.label)
+                                        Text(stringResource(option.label))
                                     },
                                     toggleControl = {
                                         Checkbox(isChecked)

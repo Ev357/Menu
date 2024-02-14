@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jídelníček</string>
+    <string name="breakfast">Snídaně</string>
+    <string name="soup">Polévka</string>
+    <string name="lunch1">Oběd1</string>
+    <string name="lunch2">Oběd2</string>
+    <string name="dinner">Večeře</string>
+    <string name="menu">Jídelníček</string>
+    <string name="settings">Nastavení</string>
+</resources>

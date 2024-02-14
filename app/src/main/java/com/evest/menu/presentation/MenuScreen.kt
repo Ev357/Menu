@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
@@ -38,6 +39,7 @@ import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TitleCard
+import com.evest.menu.R
 import com.evest.menu.presentation.theme.MenuTheme
 import getMenuList
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -73,7 +75,7 @@ fun MenuListItem(menu: Menu) {
         menuOptions.forEachIndexed { index, option ->
             if (preferences.getBoolean(option.name, true)) {
                 menuItems[index]?.let { menuItem ->
-                    Text("${option.label} - ${menuItem.name}")
+                    Text("${stringResource(option.label)} - ${menuItem.name}")
                 }
             }
         }
@@ -128,7 +130,7 @@ fun MenuScreen(navController: NavHostController) {
                                 navController.navigate(Screen.SettingsScreen.route)
                             }) {
                                 Spacer(Modifier.height(10.dp))
-                                Icon(Icons.Default.Settings, "Settings")
+                                Icon(Icons.Default.Settings, stringResource(R.string.settings))
                             }
                         }
                         items(safeMenuList, { it.date }) { menu ->
