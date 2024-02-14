@@ -2,14 +2,14 @@ package entities.relations
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import entities.Meal
+import entities.Item
 import entities.Menu
 
-data class MenuWithMeals(
+data class MenuWithItems(
     @Embedded val menu: Menu,
     @Relation(
-        parentColumn = "dateString",
-        entityColumn = "mealId"
+        parentColumn = "menuId",
+        entityColumn = "menuId",
     )
-    val meals: List<Meal>
+    val items: List<Item>,
 )

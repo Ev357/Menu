@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.webkit.URLUtil
+import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.scrollBy
@@ -14,6 +16,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,9 +31,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -37,10 +47,14 @@ import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.foundation.rememberActiveFocusRequester
 import androidx.wear.compose.material.Checkbox
 import androidx.wear.compose.material.Chip
+import androidx.wear.compose.material.ChipDefaults
+import androidx.wear.compose.material.Icon
+import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.ToggleChip
+import com.evest.menu.R
 import kotlinx.coroutines.launch
 
 @Composable
@@ -66,7 +80,6 @@ fun SettingsItem(
 @OptIn(ExperimentalWearFoundationApi::class)
 @SuppressLint("CommitPrefEdits")
 @Composable
-//fun SettingsScreen(onEvent: (MenuEvent) -> Unit) {
 fun SettingsScreen() {
     val listState = rememberScalingLazyListState(0)
     val context = LocalContext.current
@@ -115,7 +128,12 @@ fun SettingsScreen() {
                         ) {
                             preference.options.forEach { option ->
                                 var isChecked by remember {
-                                    mutableStateOf(preferences.getBoolean(option.name, true))
+                                    mutableStateOf(
+                                        preferences.getBoolean(
+                                            option.name,
+                                            option.defaultValue as Boolean
+                                        )
+                                    )
                                 }
 
                                 ToggleChip(
@@ -141,17 +159,83 @@ fun SettingsScreen() {
                     }
                 }
                 item {
-                    Chip(
-                        modifier = Modifier
-                            .fillMaxWidth(0.9f)
-                            .height(40.dp),
-                        onClick = {
-                            viewModel.onEvent(MenuEvent.ClearDatabase)
-                        },
-                        label = {
-                            Text("Clear Database") // TODO customize a bit
-                        })
+                    SettingsItem(Preference.ServerPreference) { preferences, preference ->
+                        val option = preference.options.first()
+                        var serverAddress by remember {
+                            mutableStateOf(
+                                preferences.getString(
+                                    option.name,
+                                    option.defaultValue as String
+                                ).orEmpty()
+                            )
+                        }
+                        BasicTextField(
+                            value = serverAddress,
+                            onValueChange = { newText ->
+                                val trimmedNewText = newText.trim()
+                                preferences.edit().apply {
+                                    putString(option.name, trimmedNewText)
+                                }.apply()
+                                serverAddress = trimmedNewText
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.9f)
+                                    .border(
+                                        width = 2.dp,
+                                        color = if (URLUtil.isValidUrl(serverAddress)) {
+                                            Color.White
+                                        } else {
+                                            Color.Red
+                                        },
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                            ) {
+                                Text(
+                                    serverAddress.ifEmpty {
+                                        "https://..."
+                                    },
+                                    color = if (serverAddress.isEmpty()) {
+                                        Color.Gray
+                                    } else {
+                                        Color.White
+                                    }
+                                )
+                            }
+                        }
 
+                    }
+                }
+                item {
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text(stringResource(R.string.other), fontSize = 20.sp)
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Chip(
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f)
+                                .height(40.dp),
+                            onClick = {
+                                viewModel.onEvent(MenuEvent.ClearDatabase)
+                            },
+                            label = {
+                                Text(stringResource(R.string.clear_database))
+                            },
+                            colors = ChipDefaults.chipColors(
+                                backgroundColor = MaterialTheme.colors.error
+                            ),
+                            icon = {
+                                Icon(
+                                    Icons.Default.DeleteForever,
+                                    stringResource(R.string.clear_database)
+                                )
+                            }
+                        )
+                    }
                 }
                 item {
                     Spacer(Modifier.height(0.dp))

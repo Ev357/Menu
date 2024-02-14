@@ -1,5 +1,6 @@
 package com.evest.menu.presentation
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import androidx.compose.foundation.background
@@ -8,11 +9,14 @@ import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
@@ -44,21 +48,18 @@ import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TitleCard
 import com.evest.menu.R
-import entities.relations.MenuAndMeal
+import entities.relations.MenuWithItems
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
-fun MenuListItem(menu: MenuAndMeal) {
+fun MenuListItem(menuWithItems: MenuWithItems, state: MenuState) {
     val context = LocalContext.current
-    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     val weekDay =
-        DayOfWeek.from(LocalDate.parse(menu.menu.dateString, dateFormatter))
+        DayOfWeek.from(menuWithItems.menu.date)
             .getDisplayName(TextStyle.FULL, Locale.getDefault())
             .replaceFirstChar {
                 if (it.isLowerCase()) it.titlecase(
@@ -72,20 +73,20 @@ fun MenuListItem(menu: MenuAndMeal) {
     ) {
         val preferences =
             context.getSharedPreferences(Preference.MenuPreference.name, Context.MODE_PRIVATE)
-        val menuOptions = Preference.MenuPreference.options
-        val meals = listOf(menu.breakfast, menu.soup, menu.lunch1, menu.lunch2, menu.dinner)
 
-        menuOptions.forEachIndexed { index, option ->
-            if (preferences.getBoolean(option.name, true)) {
-                meals[index]?.let { meal ->
-                    Text("${stringResource(option.label)} - ${meal.name}")
+        menuWithItems.items.filter { preferences.getBoolean("display_${it.type}", true) }
+            .forEach { item ->
+                val meal = state.mealList.find { it.mealId == item.mealId }
+                val mealLabel = stringResource(getMealTypeLabel(item.type)!!)
+                meal?.let {
+                    Text("$mealLabel - ${meal.name}")
                 }
             }
-        }
     }
 }
 
 @OptIn(ExperimentalWearFoundationApi::class)
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun MenuScreen(navController: NavHostController) {
     val listState = rememberScalingLazyListState(0)
@@ -100,12 +101,7 @@ fun MenuScreen(navController: NavHostController) {
     )
     val state by viewModel.state.collectAsState()
 
-    viewModel.onEvent(
-        MenuEvent.FetchMenu(
-            "https://jidelnicek.roznovskastredni.cz",
-            true
-        )
-    ) // TODO add to settings
+    viewModel.onEvent(MenuEvent.FetchMenu(true))
 
     Scaffold(
         positionIndicator = {
@@ -136,36 +132,55 @@ fun MenuScreen(navController: NavHostController) {
                 state = listState
             ) {
                 item {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        Button(onClick = {
-                            navController.navigate(Screen.SettingsScreen.route)
-                        }) {
-                            Spacer(Modifier.height(10.dp))
-                            Icon(Icons.Default.Settings, stringResource(R.string.settings))
+                        Box(
+                            Modifier.fillMaxWidth(0.9f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                            ) {
+                                Button(onClick = {
+                                    navController.navigate(Screen.SettingsScreen.route)
+                                }) {
+                                    Spacer(Modifier.height(10.dp))
+                                    Icon(Icons.Default.Settings, stringResource(R.string.settings))
+                                }
+
+                                Button(
+                                    onClick = {
+                                        viewModel.onEvent(MenuEvent.FetchMenu())
+                                    },
+                                    enabled = hasInternet
+                                ) {
+                                    Spacer(Modifier.height(10.dp))
+                                    Icon(Icons.Default.Refresh, stringResource(R.string.refresh))
+                                }
+                            }
                         }
 
-                        Button(
-                            onClick = {
-                                viewModel.onEvent(MenuEvent.FetchMenu("https://jidelnicek.roznovskastredni.cz"))
-                            },
-                            enabled = hasInternet
-                        ) {
-                            Spacer(Modifier.height(10.dp))
-                            Icon(Icons.Default.Refresh, stringResource(R.string.refresh))
-                        }
-                    }
-                }
-                items(state.menuList, { it.menu.dateString }) {
-                    MenuListItem(it)
-                }
-                if (state.menuList.isEmpty()) {
-                    item {
-                        if (!hasInternet) {
+                        if (state.menuWithItemsList.isEmpty() && !hasInternet) {
                             Text("No Internet Connection")
                         }
+                        if (state.status == "error") {
+                            Row(
+                                Modifier.fillMaxWidth(0.9f),
+                                horizontalArrangement = Arrangement.SpaceAround
+                            ) {
+                                Icon(
+                                    Icons.Default.Error,
+                                    stringResource(R.string.error),
+                                    tint = MaterialTheme.colors.error
+                                )
+                                Text("Error Fetching Data", color = MaterialTheme.colors.error)
+                            }
+                        }
                     }
+                }
+                items(state.menuWithItemsList, { it.menu.menuId }) {
+                    MenuListItem(it, state)
                 }
                 item {
                     Spacer(Modifier.height(20.dp))

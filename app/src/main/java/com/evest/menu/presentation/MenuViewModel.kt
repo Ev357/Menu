@@ -16,10 +16,12 @@ class MenuViewModel(
     private val dao: MenuDao, application: Application
 ) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(MenuState())
-    private val _menuList = dao.getMenuAndMeal()
-    val state = combine(_state, _menuList) { state, menuList ->
+    private val _menuList = dao.getMenuWithItems()
+    private val _mealList = dao.getMeals()
+    val state = combine(_state, _menuList, _mealList) { state, menuList, mealList ->
         state.copy(
-            menuList = menuList
+            menuWithItemsList = menuList,
+            mealList = mealList
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MenuState())
 
@@ -32,23 +34,26 @@ class MenuViewModel(
                 }
                 GlobalScope.launch {
                     _state.update {
-                        it.copy(
-                            isFetchingData = true
-                        )
+                        it.copy(isFetchingData = true)
                     }
-                    fetchMenu(event.url, dao, getApplication<Application>().applicationContext)
-                    _state.update {
+                    try {
+                        fetchMenu(dao, getApplication<Application>().applicationContext)
                         if (event.initialFetch) {
-                            it.copy(
-                                isFetchingData = false,
-                                wereDataFetched = true
-                            )
-                        } else {
-                            it.copy(
-                                isFetchingData = false,
-                            )
+                            _state.update {
+                                it.copy(wereDataFetched = true)
+                            }
                         }
 
+                        _state.update {
+                            it.copy(status = "loaded")
+                        }
+                    } catch (_: Throwable) {
+                        _state.update {
+                            it.copy(status = "error")
+                        }
+                    }
+                    _state.update {
+                        it.copy(isFetchingData = false)
                     }
                 }
             }
@@ -56,7 +61,10 @@ class MenuViewModel(
             MenuEvent.ClearDatabase -> {
                 viewModelScope.launch {
                     dao.clearMenu()
+                    dao.clearItem()
                     dao.clearMeal()
+                    dao.clearAllergen()
+                    dao.clearMealAllergenCrossRef()
                 }
             }
         }

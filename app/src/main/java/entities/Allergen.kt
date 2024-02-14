@@ -6,6 +6,6 @@ import androidx.room.PrimaryKey
 @Entity
 data class Allergen(
     @PrimaryKey(autoGenerate = false)
-    val id: Long,
-    val name: String,
+    val allergenId: Int,
+    val description: String,
 )

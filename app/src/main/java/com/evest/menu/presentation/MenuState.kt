@@ -1,9 +1,12 @@
 package com.evest.menu.presentation
 
-import entities.relations.MenuAndMeal
+import entities.Meal
+import entities.relations.MenuWithItems
 
 data class MenuState(
-    val menuList: List<MenuAndMeal> = emptyList(),
+    val menuWithItemsList: List<MenuWithItems> = emptyList(),
+    val mealList: List<Meal> = emptyList(),
     val isFetchingData: Boolean = false,
     val wereDataFetched: Boolean = false,
+    val status: String = "initial",
 )

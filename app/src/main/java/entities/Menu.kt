@@ -1,15 +1,13 @@
 package entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.time.LocalDate
 
-@Entity
+@Entity(indices = [Index(value = ["date"], unique = true)])
 data class Menu(
-    @PrimaryKey(autoGenerate = false)
-    val dateString: String,
-    val breakfastId: String? = null,
-    val soupId: String? = null,
-    val lunch1Id: String? = null,
-    val lunch2Id: String? = null,
-    val dinnerId: String? = null,
+    val date: LocalDate,
+    @PrimaryKey(autoGenerate = true)
+    val menuId: Long = 0,
 )
