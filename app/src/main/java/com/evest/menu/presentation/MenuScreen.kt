@@ -30,7 +30,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -82,16 +85,28 @@ fun MenuListItem(menuWithItems: MenuWithItems, state: MenuState) {
 
     TitleCard(
         onClick = {},
-        title = { Text(weekDay) },
+        title = { Text(weekDay, fontSize = 14.sp) },
         time = {
-            Text(titleCardDate)
-        }
+            Text(titleCardDate, fontSize = 14.sp)
+        },
     ) {
-        filteredMenuWithItems.forEach { item ->
+        filteredMenuWithItems.forEachIndexed { index, item ->
             val meal = state.mealList.find { it.mealId == item.mealId }
             val mealLabel = stringResource(getMealTypeLabel(item.type)!!)
             meal?.let {
-                Text("$mealLabel - ${meal.name}")
+                if (index != 0) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+                Column {
+                    Text(
+                        mealLabel,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                    Text(meal.name)
+                }
             }
         }
     }
