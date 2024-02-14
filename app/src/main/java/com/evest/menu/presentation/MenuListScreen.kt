@@ -10,16 +10,21 @@ import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -46,10 +52,7 @@ import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.foundation.rememberActiveFocusRequester
-import androidx.wear.compose.material.Button
-import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.CardDefaults
-import androidx.wear.compose.material.CircularProgressIndicator
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.PositionIndicator
@@ -130,7 +133,7 @@ fun MenuListItem(menuWithItems: MenuWithItems, state: MenuState, navController: 
     }
 }
 
-@OptIn(ExperimentalWearFoundationApi::class)
+@OptIn(ExperimentalWearFoundationApi::class, ExperimentalMaterialApi::class)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun MenuListScreen(navController: NavHostController) {
@@ -148,6 +151,11 @@ fun MenuListScreen(navController: NavHostController) {
 
     viewModel.onEvent(MenuEvent.FetchMenu(true))
 
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = state.isFetchingData || !state.dataLoaded,
+        onRefresh = { viewModel.onEvent(MenuEvent.FetchMenu()) },
+    )
+
     Scaffold(
         positionIndicator = {
             PositionIndicator(scalingLazyListState = listState)
@@ -156,7 +164,8 @@ fun MenuListScreen(navController: NavHostController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colors.background),
+                .background(MaterialTheme.colors.background)
+                .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.Center
         ) {
             val focusRequester = rememberActiveFocusRequester()
@@ -174,46 +183,29 @@ fun MenuListScreen(navController: NavHostController) {
                     }
                     .focusRequester(focusRequester)
                     .focusable(),
-                state = listState
+                state = listState,
+                contentPadding = PaddingValues(vertical = 50.dp, horizontal = 10.dp)
             ) {
-                item {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(5.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                if (state.dataLoaded) {
+                    item {
                         Row(
-                            modifier = Modifier.fillMaxWidth(0.9f),
-                            horizontalArrangement = Arrangement.spacedBy(
-                                5.dp,
-                                Alignment.CenterHorizontally
-                            )
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Button(
-                                onClick = {
-                                    navController.navigate(Screen.SettingsScreen.route)
-                                },
-                                colors = ButtonDefaults.secondaryButtonColors()
+                            Surface(
+                                onClick = { navController.navigate(Screen.SettingsScreen.route) },
+                                color = Color.Transparent,
+                                modifier = Modifier.height(30.dp)
                             ) {
-                                Spacer(Modifier.height(10.dp))
-                                Icon(Icons.Default.Settings, stringResource(R.string.settings))
+                                Icon(Icons.Default.Menu, stringResource(R.string.settings))
                             }
-
-                            Button(
-                                onClick = {
-                                    viewModel.onEvent(MenuEvent.FetchMenu())
-                                },
-                                colors = ButtonDefaults.secondaryButtonColors(),
-                                enabled = hasInternet
-                            ) {
-                                Spacer(Modifier.height(10.dp))
-                                Icon(Icons.Default.Refresh, stringResource(R.string.refresh))
-                            }
+                            Text(stringResource(R.string.app_name))
                         }
-
-                        if (state.menuWithItemsList.isEmpty() && !hasInternet) {
+                    }
+                    if (state.menuWithItemsList.isEmpty() && !hasInternet) {
+                        item {
                             Row(
-                                Modifier.fillMaxWidth(0.9f),
+                                Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -224,9 +216,11 @@ fun MenuListScreen(navController: NavHostController) {
                                 Text(stringResource(R.string.no_internet))
                             }
                         }
-                        if (state.status == "error") {
+                    }
+                    if (state.status == "error") {
+                        item {
                             Row(
-                                Modifier.fillMaxWidth(0.9f),
+                                Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -243,21 +237,21 @@ fun MenuListScreen(navController: NavHostController) {
                         }
                     }
                 }
+
                 items(state.menuWithItemsList, { it.menu.menuId }) {
                     MenuListItem(it, state, navController)
                 }
-                item {
-                    Spacer(Modifier.height(20.dp))
-                }
             }
-            if (state.isFetchingData) {
-                CircularProgressIndicator(
-                    modifier = Modifier.fillMaxSize(),
-                    indicatorColor = MaterialTheme.colors.secondary,
-                    trackColor = MaterialTheme.colors.onBackground.copy(alpha = 0.1f),
-                    strokeWidth = 4.dp
-                )
-            }
+
+            PullRefreshIndicator(
+                refreshing = state.isFetchingData || !state.dataLoaded,
+                state = pullRefreshState,
+                modifier = Modifier.align(
+                    Alignment.TopCenter,
+                ),
+                backgroundColor = MaterialTheme.colors.surface,
+                contentColor = MaterialTheme.colors.secondary
+            )
         }
     }
 }

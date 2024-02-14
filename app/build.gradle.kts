@@ -60,7 +60,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
+    implementation("com.google.android.material:material:1.12.0-alpha02")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.wear.compose:compose-navigation:1.3.0-beta02")
     implementation("androidx.wear:wear:1.4.0-alpha01")
@@ -72,11 +72,12 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.01"))
     debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.0-beta03")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("org.jsoup:jsoup:1.17.1")
+    implementation("org.jsoup:jsoup:1.17.2")
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
     implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.compose.material:material:1.5.4")
     ksp("androidx.room:room-compiler:2.6.1")
 }

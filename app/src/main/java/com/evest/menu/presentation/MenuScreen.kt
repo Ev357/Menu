@@ -138,7 +138,7 @@ fun MenuScreen(menuId: Long, navController: NavHostController) {
                     edgeScale = 1f,
                     edgeAlpha = 1f
                 ),
-                contentPadding = PaddingValues(start = 10.dp)
+                contentPadding = PaddingValues(vertical = 30.dp, horizontal = 10.dp)
             ) {
                 itemsIndexed(
                     filteredItemAndRelationsList,
@@ -228,7 +228,7 @@ fun LoggedItemChip(
     val scope = rememberCoroutineScope()
 
     SplitToggleChip(
-        modifier = Modifier.fillMaxWidth(0.95f),
+        modifier = Modifier.fillMaxWidth(),
         label = {
             Text(mealLabel)
         },
@@ -287,7 +287,7 @@ fun ItemChip(itemAndRelations: ItemAndRelations) {
     val mealLabel = stringResource(getMealTypeLabel(itemAndRelations.item.type)!!)
 
     Chip(
-        modifier = Modifier.fillMaxWidth(0.95f),
+        modifier = Modifier.fillMaxWidth(),
         label = {
             Text(mealLabel)
         },

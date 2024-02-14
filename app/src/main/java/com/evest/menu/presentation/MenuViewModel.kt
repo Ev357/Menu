@@ -11,6 +11,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -28,6 +29,18 @@ class MenuViewModel(
             mealList = mealList
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MenuState())
+
+    init {
+        viewModelScope.launch {
+            _menuList.collectLatest {
+                _state.update {
+                    it.copy(
+                        dataLoaded = true
+                    )
+                }
+            }
+        }
+    }
 
     private val applicationContext = getApplication<Application>().applicationContext
 

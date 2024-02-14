@@ -15,4 +15,5 @@ data class MenuState(
     val isFetchingData: Boolean = false,
     val wereDataFetched: Boolean = false,
     val status: String = "initial",
+    val dataLoaded: Boolean = false
 )
