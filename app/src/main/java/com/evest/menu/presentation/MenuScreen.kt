@@ -255,6 +255,7 @@ fun LoggedItemChip(
                                     job.join()
                                     onEvent(MenuEvent.UpdateLoggedItems(itemAndMealAndLoggedItem.item.menuId))
                                 } catch (e: Throwable) {
+                                    e.printStackTrace()
                                     startConfirmation(
                                         context,
                                         context.resources.getString(R.string.error),

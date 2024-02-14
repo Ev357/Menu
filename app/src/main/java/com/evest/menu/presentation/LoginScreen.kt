@@ -105,9 +105,7 @@ fun LoginScreen(navController: NavHostController) {
                 mutableStateOf("")
             }
 
-            val usernameCryptoManager = CryptoManager()
-            val passwordCryptoManager = CryptoManager()
-            val usernameSegmentCryptoManager = CryptoManager()
+            val cryptoManager = CryptoManager()
 
             ScalingLazyColumn(
                 Modifier
@@ -191,19 +189,28 @@ fun LoginScreen(navController: NavHostController) {
                                 var loggedSuccessfully = false
                                 val job = GlobalScope.launch {
                                     isLoading = true
-                                    if (isLoginValid(username, password, context)) {
+
+                                    val isLoginValid = try {
+                                        login(context, username, password)
+                                        true
+                                    } catch (e: Throwable) {
+                                        e.printStackTrace()
+                                        false
+                                    }
+
+                                    if (isLoginValid) {
                                         preferences.edit().apply {
                                             putString(
                                                 usernameOption.name,
-                                                usernameCryptoManager.encrypt(username)
+                                                cryptoManager.encrypt(username)
                                             )
                                             putString(
                                                 passwordOption.name,
-                                                passwordCryptoManager.encrypt(password)
+                                                cryptoManager.encrypt(password)
                                             )
                                             putString(
                                                 usernameSegmentOption.name,
-                                                usernameSegmentCryptoManager.encrypt("${username.first()}${username.last()}")
+                                                cryptoManager.encrypt("${username.first()}${username.last()}")
                                             )
                                             putBoolean(
                                                 isLoggedOption.name,

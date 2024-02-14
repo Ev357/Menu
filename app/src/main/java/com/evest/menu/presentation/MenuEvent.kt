@@ -8,5 +8,4 @@ sealed class MenuEvent {
         MenuEvent()
 
     data class UpdateLoggedItems(val menuId: Long) : MenuEvent()
-    data object RefreshDataWereFetched : MenuEvent()
 }

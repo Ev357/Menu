@@ -3,7 +3,6 @@ package com.evest.menu.presentation
 import android.content.Context
 import entities.LoggedItem
 import entities.Menu
-import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
@@ -24,24 +23,7 @@ suspend fun fetchLoggedMenu(dao: MenuDao, context: Context) {
     val url =
         serverPreferences.getString(urlOption.name, urlOption.defaultValue as String) ?: return
 
-    val accountPreferences =
-        context.getSharedPreferences(Preference.AccountPreference.name, Context.MODE_PRIVATE)
-
-    val usernameOption = Preference.AccountPreference.options[1]
-    val passwordOption = Preference.AccountPreference.options[2]
-
-    val encryptedUsername =
-        accountPreferences.getString(usernameOption.name, usernameOption.defaultValue as String)
-            ?: return
-
-    val encryptedPassword =
-        accountPreferences.getString(passwordOption.name, passwordOption.defaultValue as String)
-            ?: return
-
-    val cryptoManager = CryptoManager()
-
-    val username = cryptoManager.decrypt(encryptedUsername)
-    val password = cryptoManager.decrypt(encryptedPassword)
+    val (jSessionId, rememberMe) = login(context)
 
     val client = OkHttpClient.Builder()
         .connectTimeout(20, TimeUnit.SECONDS)
@@ -49,39 +31,6 @@ suspend fun fetchLoggedMenu(dao: MenuDao, context: Context) {
         .readTimeout(20, TimeUnit.SECONDS)
         .followRedirects(false)
         .build()
-
-    val getRequest = Request.Builder()
-        .url(url)
-        .build()
-
-    val getResponse = client.newCall(getRequest).execute()
-
-    val initialJSessionId = getCookieValue(getResponse, "JSESSIONID")
-    val initialXsrfToken = getCookieValue(getResponse, "XSRF-TOKEN") ?: return
-
-    val formBody = FormBody.Builder()
-        .add("j_username", username)
-        .add("j_password", password)
-        .add("_spring_security_remember_me", "on")
-        .add("terminal", "false")
-        .add("_csrf", initialXsrfToken)
-        .add("targetUrl", "/faces/secured/main.jsp?terminal=false&status=true&printer=&keyboard=")
-        .build()
-
-    val postRequest = Request.Builder()
-        .url("$url/j_spring_security_check")
-        .post(formBody)
-        .header("cookie", "XSRF-TOKEN=$initialXsrfToken; JSESSIONID=$initialJSessionId")
-        .build()
-
-    val postResponse = client.newCall(postRequest).execute()
-
-    val jSessionId = getCookieValue(postResponse, "JSESSIONID")
-    val rememberMe = getCookieValue(postResponse, "remember-me")
-
-    if (jSessionId.isNullOrEmpty()) {
-        throw Exception("Login Failed")
-    }
 
     val menuRequest = Request.Builder()
         .url("$url/faces/secured/month.jsp?terminal=false&keyboard=false&printer=false")

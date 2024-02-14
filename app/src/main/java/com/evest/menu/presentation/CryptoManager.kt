@@ -14,8 +14,10 @@ class CryptoManager {
         load(null)
     }
 
-    private val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
-        init(Cipher.ENCRYPT_MODE, getKey())
+    private fun encryptCipher(): Cipher {
+        return Cipher.getInstance(TRANSFORMATION).apply {
+            init(Cipher.ENCRYPT_MODE, getKey())
+        }
     }
 
     private fun getDecryptCipherForIv(iv: ByteArray): Cipher {
@@ -46,9 +48,11 @@ class CryptoManager {
     }
 
     fun encrypt(clearText: String): String {
+        val ec = encryptCipher()
+
         val cipherText =
-            Base64.encodeToString(encryptCipher.doFinal(clearText.toByteArray()), Base64.DEFAULT)
-        val iv = Base64.encodeToString(encryptCipher.iv, Base64.DEFAULT)
+            Base64.encodeToString(ec.doFinal(clearText.toByteArray()), Base64.DEFAULT)
+        val iv = Base64.encodeToString(ec.iv, Base64.DEFAULT)
 
         return "${cipherText}.$iv"
     }

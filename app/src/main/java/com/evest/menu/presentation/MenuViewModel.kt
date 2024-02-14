@@ -79,7 +79,8 @@ class MenuViewModel(
                         _state.update {
                             it.copy(status = "loaded")
                         }
-                    } catch (_: Throwable) {
+                    } catch (e: Throwable) {
+                        e.printStackTrace()
                         startConfirmation(
                             applicationContext, applicationContext.resources.getString(
                                 R.string.error_fetching
@@ -111,7 +112,8 @@ class MenuViewModel(
                                 R.string.database_cleared
                             )
                         )
-                    } catch (_: Throwable) {
+                    } catch (e: Throwable) {
+                        e.printStackTrace()
                         startConfirmation(
                             applicationContext, applicationContext.resources.getString(
                                 R.string.database_clear_error
@@ -142,15 +144,6 @@ class MenuViewModel(
                         )
                     }
                 }
-            }
-
-            MenuEvent.RefreshDataWereFetched -> {
-                _state.update {
-                    it.copy(
-                        wereDataFetched = false
-                    )
-                }
-                print(state.value.wereDataFetched)
             }
 
             is MenuEvent.UpdateLoggedItems -> {
