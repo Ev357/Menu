@@ -2,8 +2,8 @@
     <string name="app_name">Menu</string>
     <string name="breakfast">Breakfast</string>
     <string name="soup">Soup</string>
-    <string name="lunch1" tools:ignore="Typos">Lunch1</string>
-    <string name="lunch2">Lunch2</string>
+    <string name="lunch1" tools:ignore="Typos">Lunch 1</string>
+    <string name="lunch2">Lunch 2</string>
     <string name="dinner">Dinner</string>
     <string name="menu">Menu</string>
     <string name="settings">Settings</string>
@@ -21,4 +21,12 @@
     <string name="confirm">Confirm</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="not_allowed">Not Allowed</string>
+    <string name="account">Account</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="logout">Log Out</string>
+    <string name="login">Log In</string>
+    <string name="logged_as">Logged as</string>
+    <string name="login_successful">Logged In Successfuly</string>
+    <string name="login_failed">Login Failed</string>
 </resources>

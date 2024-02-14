@@ -3,8 +3,8 @@
     <string name="app_name">Jídelníček</string>
     <string name="breakfast">Snídaně</string>
     <string name="soup">Polévka</string>
-    <string name="lunch1">Oběd1</string>
-    <string name="lunch2">Oběd2</string>
+    <string name="lunch1">Oběd 1</string>
+    <string name="lunch2">Oběd 2</string>
     <string name="dinner">Večeře</string>
     <string name="menu">Jídelníček</string>
     <string name="settings">Nastavení</string>
@@ -22,4 +22,12 @@
     <string name="confirm">Potvrdit</string>
     <string name="are_you_sure">Jste si jistí?</string>
     <string name="not_allowed">Není Povoleno</string>
+    <string name="account">Účet</string>
+    <string name="password">Heslo</string>
+    <string name="username">Uživatelské Jméno</string>
+    <string name="logout">Odhlásit</string>
+    <string name="login">Přihlásit</string>
+    <string name="logged_as">Přihlášen jako</string>
+    <string name="login_successful">Úspěšně přihlášen</string>
+    <string name="login_failed">Přihlášení selhalo</string>
 </resources>

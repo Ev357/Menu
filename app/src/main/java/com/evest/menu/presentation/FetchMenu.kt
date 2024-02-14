@@ -24,7 +24,9 @@ suspend fun fetchMenu(dao: MenuDao, context: Context) {
         return
     }
 
-    val doc = Jsoup.connect(url).header("ngrok-skip-browser-warning", "69420").get()
+    val doc = Jsoup.connect(url)
+        .header("ngrok-skip-browser-warning", "69420")
+        .timeout(20 * 1000).get()
 
     val dayMenuElements = doc.getElementsByClass("jidelnicekDen")
     if (dayMenuElements.isNullOrEmpty()) {

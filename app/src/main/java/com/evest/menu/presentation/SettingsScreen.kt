@@ -21,7 +21,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.NoAccounts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
@@ -80,7 +83,7 @@ fun SettingsItem(
 @OptIn(ExperimentalWearFoundationApi::class)
 @SuppressLint("CommitPrefEdits")
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(navController: NavHostController) {
     val listState = rememberScalingLazyListState(0)
     val context = LocalContext.current
     val dao = MenuDatabase.getInstance(context).dao
@@ -91,6 +94,9 @@ fun SettingsScreen() {
             }
         }
     )
+
+    val cryptoManager = CryptoManager()
+    val hasInternet = isInternetAvailable(context)
 
     Scaffold(
         positionIndicator = {
@@ -119,7 +125,89 @@ fun SettingsScreen() {
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 item {
-                    Spacer(Modifier.height(0.dp))
+                    SettingsItem(Preference.AccountPreference) { preferences, preference ->
+                        val isLoggedOption = preference.options.first()
+                        val usernameOption = Preference.AccountPreference.options[1]
+                        val passwordOption = Preference.AccountPreference.options[2]
+                        val usernameSegmentOption = Preference.AccountPreference.options[3]
+
+                        var isLogged by mutableStateOf(
+                            preferences.getBoolean(
+                                isLoggedOption.name,
+                                isLoggedOption.defaultValue as Boolean
+                            )
+                        )
+
+                        Chip(
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f)
+                                .height(40.dp),
+                            enabled = isLogged || hasInternet,
+                            onClick = {
+                                if (isLogged) {
+                                    preferences.edit().apply {
+                                        putString(
+                                            usernameOption.name,
+                                            ""
+                                        )
+                                        putString(
+                                            passwordOption.name,
+                                            ""
+                                        )
+                                        putString(
+                                            usernameSegmentOption.name,
+                                            ""
+                                        )
+                                        putBoolean(
+                                            isLoggedOption.name,
+                                            false
+                                        )
+                                    }.apply().also {
+                                        isLogged = false
+                                    }
+                                } else {
+                                    navController.navigate(Screen.LoginScreen.route)
+                                }
+                            },
+                            label = {
+                                if (isLogged) {
+                                    val encryptedUsernameSubstring = preferences.getString(
+                                        usernameSegmentOption.name,
+                                        usernameSegmentOption.defaultValue as String
+                                    ) ?: return@Chip
+
+                                    val usernameSubstring =
+                                        cryptoManager.decrypt(encryptedUsernameSubstring)
+                                            .split("").filter { it.isNotEmpty() }
+                                            .joinToString("...")
+
+                                    Column {
+                                        Text(
+                                            "${stringResource(R.string.logged_as)}: $usernameSubstring",
+                                            modifier = Modifier.fillMaxWidth(),
+                                            fontSize = 10.sp
+                                        )
+                                        Text(stringResource(R.string.logout), fontSize = 14.sp)
+                                    }
+                                } else {
+                                    Text(stringResource(R.string.login))
+                                }
+                            },
+                            icon = {
+                                if (isLogged) {
+                                    Icon(Icons.Default.NoAccounts, stringResource(R.string.logout))
+                                } else {
+                                    Icon(
+                                        Icons.Default.AccountCircle,
+                                        stringResource(R.string.login)
+                                    )
+                                }
+                            },
+                            colors = ChipDefaults.chipColors(
+                                MaterialTheme.colors.secondary
+                            )
+                        )
+                    }
                 }
                 item {
                     SettingsItem(Preference.MenuPreference) { preferences, preference ->
@@ -206,7 +294,6 @@ fun SettingsScreen() {
                                 )
                             }
                         }
-
                     }
                 }
                 item {
@@ -244,9 +331,6 @@ fun SettingsScreen() {
                             )
                         }
                     }
-                }
-                item {
-                    Spacer(Modifier.height(0.dp))
                 }
             }
         }

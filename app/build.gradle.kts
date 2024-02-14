@@ -2,7 +2,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
-    kotlin("plugin.serialization")
 }
 
 android {
@@ -76,7 +75,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.4")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     implementation("org.jsoup:jsoup:1.17.1")
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
     implementation("androidx.room:room-ktx:2.6.1")

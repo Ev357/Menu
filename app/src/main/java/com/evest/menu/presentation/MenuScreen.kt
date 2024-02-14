@@ -50,6 +50,7 @@ import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Checkbox
 import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.ChipDefaults
+import androidx.wear.compose.material.CircularProgressIndicator
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.PositionIndicator
@@ -57,7 +58,9 @@ import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.SplitToggleChip
 import androidx.wear.compose.material.Text
 import com.evest.menu.R
-import entities.relations.ItemAndMeal
+import entities.relations.ItemAndMealAndLoggedItem
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalWearFoundationApi::class)
@@ -76,6 +79,19 @@ fun MenuScreen(menuId: Long) {
 
     val state by viewModel.state.collectAsState()
 
+    val isLoggedOption = Preference.AccountPreference.options.first()
+
+    val accountPreferences = remember {
+        context.getSharedPreferences(Preference.AccountPreference.name, Context.MODE_PRIVATE)
+    }
+
+    val isLogged by mutableStateOf(
+        accountPreferences.getBoolean(
+            isLoggedOption.name,
+            isLoggedOption.defaultValue as Boolean
+        )
+    )
+
     viewModel.onEvent(MenuEvent.GetMenu(menuId))
 
     Scaffold(
@@ -91,16 +107,18 @@ fun MenuScreen(menuId: Long) {
             val focusRequester = rememberActiveFocusRequester()
             val coroutineScope = rememberCoroutineScope()
 
-            val preferences =
+            val menuPreferences =
                 context.getSharedPreferences(Preference.MenuPreference.name, Context.MODE_PRIVATE)
 
-            val filteredItemAndMealList =
-                state.itemAndMealList.filter {
-                    preferences.getBoolean(
+            val filteredItemAndMealAndLoggedItemList =
+                state.itemAndMealAndLoggedItemList.filter {
+                    menuPreferences.getBoolean(
                         "display_${it.item.type}",
                         true
                     )
                 }
+
+            val hasInternet = isInternetAvailable(context)
 
             ScalingLazyColumn(
                 modifier = Modifier
@@ -122,13 +140,13 @@ fun MenuScreen(menuId: Long) {
                 contentPadding = PaddingValues(start = 10.dp)
             ) {
                 itemsIndexed(
-                    filteredItemAndMealList,
+                    filteredItemAndMealAndLoggedItemList,
                     { _, (item) -> item.itemId }
-                ) { index, itemAndMeal ->
+                ) { index, itemAndMealAndLoggedItem ->
                     val revealState = rememberRevealState()
                     val scope = rememberCoroutineScope()
                     val allergens =
-                        state.mealWithAllergensList.find { it.meal.mealId == itemAndMeal.meal.mealId }
+                        state.mealWithAllergensList.find { it.meal.mealId == itemAndMealAndLoggedItem.meal.mealId }
 
                     SwipeToReveal(
                         modifier = if (index == 0) Modifier.padding(top = 20.dp) else Modifier,
@@ -169,16 +187,16 @@ fun MenuScreen(menuId: Long) {
                             }
                         },
                         state = revealState,
-                        onFullSwipe = {
-                            /*scope.launch {
-                                revealState.animateTo(RevealValue.Covered)
-                            }*/
-                        }
                     ) {
-                        if (itemAndMeal.item.state != "unknown") {
-                            LoggedItemChip(itemAndMeal)
+                        if (isLogged && itemAndMealAndLoggedItem.item.type != "soup") {
+                            LoggedItemChip(
+                                itemAndMealAndLoggedItem,
+                                dao,
+                                viewModel::onEvent,
+                                hasInternet
+                            )
                         } else {
-                            ItemChip(itemAndMeal)
+                            ItemChip(itemAndMealAndLoggedItem)
                         }
                     }
                 }
@@ -187,14 +205,24 @@ fun MenuScreen(menuId: Long) {
     }
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun LoggedItemChip(itemAndMeal: ItemAndMeal) {
-    val mealLabel = stringResource(getMealTypeLabel(itemAndMeal.item.type)!!)
-    var checked by remember {
-        mutableStateOf(
-            itemAndMeal.item.state == "taken"
-        )
+fun LoggedItemChip(
+    itemAndMealAndLoggedItem: ItemAndMealAndLoggedItem,
+    dao: MenuDao,
+    onEvent: (MenuEvent) -> Unit,
+    hasInternet: Boolean
+) {
+    val context = LocalContext.current
+    val mealLabel = stringResource(getMealTypeLabel(itemAndMealAndLoggedItem.item.type)!!)
+    var checked by mutableStateOf(
+        itemAndMealAndLoggedItem.loggedItem?.isTaken == true
+    )
+    var isLoading by remember {
+        mutableStateOf(false)
     }
+
+    val scope = rememberCoroutineScope()
 
     SplitToggleChip(
         modifier = Modifier.fillMaxWidth(0.95f),
@@ -202,19 +230,46 @@ fun LoggedItemChip(itemAndMeal: ItemAndMeal) {
             Text(mealLabel)
         },
         secondaryLabel = {
-            Text(itemAndMeal.meal.name)
+            Text(itemAndMealAndLoggedItem.meal.name)
         },
         checked = checked,
         toggleControl = {
-            if (itemAndMeal.item.state != "not_allowed") {
-                Checkbox(
-                    checked = checked,
-                    enabled = true,
+            if (isLoading) {
+                CircularProgressIndicator(
+                    indicatorColor = MaterialTheme.colors.secondary,
+                    trackColor = MaterialTheme.colors.onBackground.copy(alpha = 0.1f),
+                    strokeWidth = 2.dp
                 )
             } else {
-                Icon(Icons.Default.Block, stringResource(R.string.not_allowed))
+                if (itemAndMealAndLoggedItem.loggedItem?.state != "not_allowed") {
+                    Checkbox(
+                        checked = checked,
+                        enabled = itemAndMealAndLoggedItem.loggedItem?.state != "over" && hasInternet,
+                        onCheckedChange = {
+                            scope.launch {
+                                try {
+                                    isLoading = true
+                                    val job = GlobalScope.launch {
+                                        postData(context, itemAndMealAndLoggedItem, dao)
+                                    }
+                                    job.join()
+                                    onEvent(MenuEvent.UpdateLoggedItems(itemAndMealAndLoggedItem.item.menuId))
+                                } catch (e: Throwable) {
+                                    startConfirmation(
+                                        context,
+                                        context.resources.getString(R.string.error),
+                                        "error"
+                                    )
+                                }
+                                isLoading = false
+                            }
+                            checked = it
+                        }
+                    )
+                } else {
+                    Icon(Icons.Default.Block, stringResource(R.string.not_allowed))
+                }
             }
-
         },
         onCheckedChange = { checked = it },
         onClick = { checked = !checked },
@@ -224,8 +279,8 @@ fun LoggedItemChip(itemAndMeal: ItemAndMeal) {
 }
 
 @Composable
-fun ItemChip(itemAndMeal: ItemAndMeal) {
-    val mealLabel = stringResource(getMealTypeLabel(itemAndMeal.item.type)!!)
+fun ItemChip(itemAndMealAndLoggedItem: ItemAndMealAndLoggedItem) {
+    val mealLabel = stringResource(getMealTypeLabel(itemAndMealAndLoggedItem.item.type)!!)
 
     Chip(
         modifier = Modifier.fillMaxWidth(0.95f),
@@ -233,7 +288,7 @@ fun ItemChip(itemAndMeal: ItemAndMeal) {
             Text(mealLabel)
         },
         secondaryLabel = {
-            Text(itemAndMeal.meal.name)
+            Text(itemAndMealAndLoggedItem.meal.name)
         },
         shape = MaterialTheme.shapes.large,
         colors = ChipDefaults.secondaryChipColors(),

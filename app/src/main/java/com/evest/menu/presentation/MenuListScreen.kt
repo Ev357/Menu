@@ -168,7 +168,9 @@ fun MenuListScreen(navController: NavHostController) {
             ) {
                 item {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(5.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Box(
                             Modifier.fillMaxWidth(0.9f),
@@ -202,8 +204,9 @@ fun MenuListScreen(navController: NavHostController) {
 
                         if (state.menuWithItemsList.isEmpty() && !hasInternet) {
                             Row(
-                                Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceAround
+                                Modifier.fillMaxWidth(0.9f),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
                                     Icons.Default.CloudOff,
@@ -215,7 +218,8 @@ fun MenuListScreen(navController: NavHostController) {
                         if (state.status == "error") {
                             Row(
                                 Modifier.fillMaxWidth(0.9f),
-                                horizontalArrangement = Arrangement.SpaceAround
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
                                     Icons.Default.Error,

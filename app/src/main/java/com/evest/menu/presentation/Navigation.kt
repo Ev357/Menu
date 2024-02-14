@@ -18,7 +18,7 @@ fun Navigation() {
             MenuListScreen(navController)
         }
         composable(Screen.SettingsScreen.route) {
-            SettingsScreen()
+            SettingsScreen(navController)
         }
         composable(
             Screen.MenuScreen.route + "/{menuId}",
@@ -29,6 +29,9 @@ fun Navigation() {
             )
         ) { entry ->
             entry.arguments?.let { MenuScreen(it.getLong("menuId")) }
+        }
+        composable(Screen.LoginScreen.route) {
+            LoginScreen(navController)
         }
     }
 }

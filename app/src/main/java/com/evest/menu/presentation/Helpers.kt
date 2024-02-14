@@ -8,7 +8,10 @@ import android.net.NetworkCapabilities
 import androidx.core.content.ContextCompat
 import androidx.wear.activity.ConfirmationActivity
 import com.evest.menu.R
+import okhttp3.Response
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -98,4 +101,31 @@ fun getNewestOldestDateString(dateStringList: List<String>): Pair<String, String
             newOldest to newNewest
         }
     }
+}
+
+fun getCookieValue(response: Response, cookieName: String): String? {
+    return response.headers("Set-Cookie")
+        .find { it.startsWith(cookieName) }
+        ?.substringAfter("$cookieName=")
+        ?.substringBefore(";")
+}
+
+fun parseTimeBetweenTags(input: String, tag: String): LocalTime? {
+    val cleanInput = input.replace(" ", " ")
+    val regex = "$tag <b>\\s*([^<]+)</b>".toRegex()
+    val matchResult =
+        regex.find(cleanInput) ?: return null
+
+    val timeString = matchResult.groupValues[1]
+    return LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm:ss"))
+}
+
+fun parseDateTimeBetweenTags(input: String, tag: String): LocalDateTime? {
+    val cleanInput = input.replace(" ", " ")
+    val regex = "$tag <b>\\s*([^<]+)</b>".toRegex()
+    val matchResult =
+        regex.find(cleanInput) ?: return null
+
+    val dateTimeString = matchResult.groupValues[1]
+    return LocalDateTime.parse(dateTimeString, DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"))
 }

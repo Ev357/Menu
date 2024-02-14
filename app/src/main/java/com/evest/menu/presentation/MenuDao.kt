@@ -6,14 +6,17 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import entities.Allergen
 import entities.Item
+import entities.LoggedItem
 import entities.Meal
 import entities.Menu
-import entities.relations.ItemAndMeal
+import entities.relations.ItemAndMealAndLoggedItem
 import entities.relations.MealAllergenCrossRef
 import entities.relations.MealWithAllergens
 import entities.relations.MenuWithItems
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 @Dao
 interface MenuDao {
@@ -31,12 +34,17 @@ interface MenuDao {
     suspend fun upsertAllergen(allergen: Allergen): Long
 
     @Upsert
+    suspend fun upsertLoggedItem(meal: LoggedItem): Long
+
+    @Upsert
     suspend fun upsertMealAllergenCrossRef(crossRef: MealAllergenCrossRef): Long
 
     // Queries
-    @Query("SELECT * FROM menu WHERE date(date) >= date(\"now\")")
+    @Transaction
+    @Query("SELECT * FROM menu WHERE date(date) >= date('now')")
     fun getMenuWithItems(): Flow<List<MenuWithItems>>
 
+    @Transaction
     @Query("SELECT * FROM meal")
     fun getMeals(): Flow<List<Meal>>
 
@@ -45,8 +53,16 @@ interface MenuDao {
     suspend fun getMenu(date: LocalDate): Menu?
 
     @Transaction
+    @Query("SELECT * FROM menu WHERE menuId = :menuId")
+    suspend fun getMenuById(menuId: Long): Menu?
+
+    @Transaction
     @Query("SELECT * FROM item WHERE menuId = :menuId")
-    suspend fun getItemAndMealList(menuId: Long): List<ItemAndMeal>
+    suspend fun getItemAndMealAndLoggedItemList(menuId: Long): List<ItemAndMealAndLoggedItem>
+
+    @Transaction
+    @Query("SELECT * FROM item WHERE menuId = :menuId AND type = :mealType")
+    suspend fun getItem(menuId: Long, mealType: String): Item?
 
     @Transaction
     @Query("SELECT * FROM meal WHERE mealId IN (:mealIdList)")
@@ -57,19 +73,21 @@ interface MenuDao {
     suspend fun getMeal(name: String): Meal?
 
     @Transaction
+    @Query("UPDATE item SET mealId = :mealId WHERE menuId = :menuId AND type = :type")
+    suspend fun updateMenuItem(menuId: Long, type: String, mealId: Long)
+
+    @Transaction
     @Query(
-        "UPDATE item SET mealId = :mealId, state = :state, price = :price, startDispensingTime = :startDispensingTime, endDispensingTime = :endDispensingTime, endOrderTime = :endOrderTime, endCancelTime = :endCancelTime WHERE menuId = :menuId AND type = :type"
+        "UPDATE loggeditem SET state = :state, startDispensingTime = :startDispensingTime, endDispensingTime = :endDispensingTime, endOrderDateTime = :endOrderDateTime, endCancelDateTime = :endCancelDateTime, isTaken = :isTaken WHERE itemId = :itemId"
     )
-    suspend fun updateMenuItem(
-        menuId: Long,
-        type: String,
-        mealId: Long,
-        state: String = "unknown",
-        price: Int? = null,
-        startDispensingTime: LocalDate? = null,
-        endDispensingTime: LocalDate? = null,
-        endOrderTime: LocalDate? = null,
-        endCancelTime: LocalDate? = null,
+    suspend fun updateLoggedItem(
+        itemId: Long,
+        state: String,
+        startDispensingTime: LocalTime,
+        endDispensingTime: LocalTime,
+        endOrderDateTime: LocalDateTime,
+        endCancelDateTime: LocalDateTime,
+        isTaken: Boolean = false,
     )
 
     @Transaction
@@ -107,4 +125,8 @@ interface MenuDao {
     @Transaction
     @Query("DELETE FROM mealallergencrossref")
     suspend fun clearMealAllergenCrossRef()
+
+    @Transaction
+    @Query("DELETE FROM loggeditem")
+    suspend fun clearLoggedItem()
 }

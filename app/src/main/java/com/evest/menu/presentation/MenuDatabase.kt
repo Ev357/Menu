@@ -13,6 +13,8 @@ import entities.Meal
 import entities.Menu
 import entities.relations.MealAllergenCrossRef
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Database(
@@ -51,14 +53,39 @@ abstract class MenuDatabase : RoomDatabase() {
 
 class Converters {
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+    private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
 
+    // Date
     @TypeConverter
-    fun fromString(string: String): LocalDate {
+    fun dateFromString(string: String): LocalDate {
         return LocalDate.parse(string, dateFormatter)
     }
 
     @TypeConverter
     fun dateToString(date: LocalDate): String {
         return dateFormatter.format(date)
+    }
+
+    // Time
+    @TypeConverter
+    fun timeFromString(string: String): LocalTime {
+        return LocalTime.parse(string, timeFormatter)
+    }
+
+    @TypeConverter
+    fun timeToString(date: LocalTime): String {
+        return timeFormatter.format(date)
+    }
+
+    // DateTime
+    @TypeConverter
+    fun dateTimeFromString(string: String): LocalDateTime {
+        return LocalDateTime.parse(string, dateTimeFormatter)
+    }
+
+    @TypeConverter
+    fun dateTimeToString(date: LocalDateTime): String {
+        return dateTimeFormatter.format(date)
     }
 }

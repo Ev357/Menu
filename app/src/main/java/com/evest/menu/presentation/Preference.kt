@@ -39,4 +39,31 @@ sealed class Preference(
             ),
         )
     )
+
+    data object AccountPreference : Preference(
+        "account_preference",
+        R.string.account,
+        listOf(
+            PreferenceOption(
+                "isLogged",
+                false,
+                0
+            ),
+            PreferenceOption(
+                "username",
+                "",
+                R.string.username
+            ),
+            PreferenceOption(
+                "password",
+                "",
+                R.string.password
+            ),
+            PreferenceOption(
+                "usernameSegment",
+                "",
+                0
+            ),
+        )
+    )
 }

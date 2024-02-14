@@ -2,6 +2,7 @@ package com.evest.menu.presentation
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -30,14 +31,28 @@ class MenuViewModel(
 
     private val applicationContext = getApplication<Application>().applicationContext
 
+    private val isLoggedOption = Preference.AccountPreference.options.first()
+
+    private val preferences = applicationContext.getSharedPreferences(
+        Preference.AccountPreference.name,
+        Context.MODE_PRIVATE
+    )
+
+    private fun isLogged(): Boolean {
+        return preferences.getBoolean(
+            isLoggedOption.name,
+            isLoggedOption.defaultValue as Boolean
+        )
+    }
+
     @SuppressLint("WearRecents")
     @OptIn(DelicateCoroutinesApi::class)
     fun onEvent(event: MenuEvent) {
         when (event) {
             is MenuEvent.FetchMenu -> {
                 if (
-                    (event.initialFetch && _state.value.wereDataFetched) ||
-                    (event.initialFetch && _state.value.status == "error")
+                    (event.initialFetch && state.value.wereDataFetched) ||
+                    (event.initialFetch && state.value.status == "error")
                 ) {
                     return
                 }
@@ -50,6 +65,11 @@ class MenuViewModel(
                     }
                     try {
                         fetchMenu(dao, applicationContext)
+
+                        if (isLogged()) {
+                            fetchLoggedMenu(dao, applicationContext)
+                        }
+
                         if (event.initialFetch) {
                             _state.update {
                                 it.copy(wereDataFetched = true)
@@ -84,6 +104,7 @@ class MenuViewModel(
                         dao.clearMeal()
                         dao.clearAllergen()
                         dao.clearMealAllergenCrossRef()
+                        dao.clearLoggedItem()
 
                         startConfirmation(
                             applicationContext, applicationContext.resources.getString(
@@ -111,13 +132,34 @@ class MenuViewModel(
 
             is MenuEvent.GetMenu -> {
                 viewModelScope.launch {
-                    val itemAndMealList = dao.getItemAndMealList(event.menuId)
+                    val itemAndMealList = dao.getItemAndMealAndLoggedItemList(event.menuId)
                     val mealWithAllergensList =
                         dao.getMealWithAllergens(itemAndMealList.map { it.meal.mealId })
                     _state.update {
                         it.copy(
-                            itemAndMealList = itemAndMealList,
+                            itemAndMealAndLoggedItemList = itemAndMealList,
                             mealWithAllergensList = mealWithAllergensList
+                        )
+                    }
+                }
+            }
+
+            MenuEvent.RefreshDataWereFetched -> {
+                _state.update {
+                    it.copy(
+                        wereDataFetched = false
+                    )
+                }
+                print(state.value.wereDataFetched)
+            }
+
+            is MenuEvent.UpdateLoggedItems -> {
+                viewModelScope.launch {
+                    val itemAndMealAndLoggedItemList =
+                        dao.getItemAndMealAndLoggedItemList(event.menuId)
+                    _state.update {
+                        it.copy(
+                            itemAndMealAndLoggedItemList = itemAndMealAndLoggedItemList,
                         )
                     }
                 }

@@ -6,4 +6,7 @@ sealed class MenuEvent {
     data object ClearDatabase : MenuEvent()
     data class OpenAlert(val actionName: String, val titleText: String, val message: String) :
         MenuEvent()
+
+    data class UpdateLoggedItems(val menuId: Long) : MenuEvent()
+    data object RefreshDataWereFetched : MenuEvent()
 }

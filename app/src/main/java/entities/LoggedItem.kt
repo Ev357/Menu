@@ -4,7 +4,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 @Entity(
     indices = [Index(value = ["itemId"], unique = true)],
@@ -16,12 +17,12 @@ import java.time.LocalDate
     )]
 )
 data class LoggedItem(
-    val state: String = "untaken", // states: "taken" | "untaken" | "taken" | "not_allowed" | "over"
-    val price: Int,
-    val startDispensingTime: LocalDate,
-    val endDispensingTime: LocalDate,
-    val endOrderTime: LocalDate,
-    val endCancelTime: LocalDate,
+    var isTaken: Boolean = false,
+    val state: String = "normal", // states: "normal" | "not_allowed" | "over"
+    val startDispensingTime: LocalTime,
+    val endDispensingTime: LocalTime,
+    val endOrderDateTime: LocalDateTime,
+    val endCancelDateTime: LocalDateTime,
     val itemId: Long,
     @PrimaryKey(autoGenerate = true)
     val loggedItemId: Long = 0,
