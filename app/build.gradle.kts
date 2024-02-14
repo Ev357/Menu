@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp")
     kotlin("plugin.serialization")
 }
 
@@ -72,5 +73,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     implementation("org.jsoup:jsoup:1.17.1")
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
-    implementation(kotlin("reflect"))
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
 }

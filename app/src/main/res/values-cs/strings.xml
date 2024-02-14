@@ -8,4 +8,5 @@
     <string name="dinner">Večeře</string>
     <string name="menu">Jídelníček</string>
     <string name="settings">Nastavení</string>
+    <string name="refresh">Obnovit</string>
 </resources>
