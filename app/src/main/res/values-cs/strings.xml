@@ -12,6 +12,6 @@
     <string name="server_address">Adresa Serveru</string>
     <string name="server">Server</string>
     <string name="other">Ostatní</string>
-    <string name="clear_database">Vymyzat Databázi</string>
+    <string name="clear_database">Vymazat Databázi</string>
     <string name="error">Chyba</string>
 </resources>
