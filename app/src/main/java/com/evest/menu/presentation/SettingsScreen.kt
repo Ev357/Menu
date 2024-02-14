@@ -210,31 +210,33 @@ fun SettingsScreen() {
                     }
                 }
                 item {
-                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text(stringResource(R.string.other), fontSize = 20.sp)
-                    }
-                    Spacer(Modifier.height(10.dp))
-                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Chip(
-                            modifier = Modifier
-                                .fillMaxWidth(0.9f)
-                                .height(40.dp),
-                            onClick = {
-                                viewModel.onEvent(MenuEvent.ClearDatabase)
-                            },
-                            label = {
-                                Text(stringResource(R.string.clear_database))
-                            },
-                            colors = ChipDefaults.chipColors(
-                                backgroundColor = MaterialTheme.colors.error
-                            ),
-                            icon = {
-                                Icon(
-                                    Icons.Default.DeleteForever,
-                                    stringResource(R.string.clear_database)
-                                )
-                            }
-                        )
+                    Column {
+                        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            Text(stringResource(R.string.other), fontSize = 20.sp)
+                        }
+                        Spacer(Modifier.height(10.dp))
+                        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            Chip(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.9f)
+                                    .height(40.dp),
+                                onClick = {
+                                    viewModel.onEvent(MenuEvent.ClearDatabase)
+                                },
+                                label = {
+                                    Text(stringResource(R.string.clear_database))
+                                },
+                                colors = ChipDefaults.chipColors(
+                                    backgroundColor = MaterialTheme.colors.error
+                                ),
+                                icon = {
+                                    Icon(
+                                        Icons.Default.DeleteForever,
+                                        stringResource(R.string.clear_database)
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
                 item {
