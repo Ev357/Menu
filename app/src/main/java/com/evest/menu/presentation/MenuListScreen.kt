@@ -172,33 +172,32 @@ fun MenuListScreen(navController: NavHostController) {
                         verticalArrangement = Arrangement.spacedBy(5.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Box(
-                            Modifier.fillMaxWidth(0.9f),
-                            contentAlignment = Alignment.Center
+                        Row(
+                            modifier = Modifier.fillMaxWidth(0.9f),
+                            horizontalArrangement = Arrangement.spacedBy(
+                                5.dp,
+                                Alignment.CenterHorizontally
+                            )
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                            Button(
+                                onClick = {
+                                    navController.navigate(Screen.SettingsScreen.route)
+                                },
+                                colors = ButtonDefaults.secondaryButtonColors()
                             ) {
-                                Button(
-                                    onClick = {
-                                        navController.navigate(Screen.SettingsScreen.route)
-                                    },
-                                    colors = ButtonDefaults.secondaryButtonColors()
-                                ) {
-                                    Spacer(Modifier.height(10.dp))
-                                    Icon(Icons.Default.Settings, stringResource(R.string.settings))
-                                }
+                                Spacer(Modifier.height(10.dp))
+                                Icon(Icons.Default.Settings, stringResource(R.string.settings))
+                            }
 
-                                Button(
-                                    onClick = {
-                                        viewModel.onEvent(MenuEvent.FetchMenu())
-                                    },
-                                    colors = ButtonDefaults.secondaryButtonColors(),
-                                    enabled = hasInternet
-                                ) {
-                                    Spacer(Modifier.height(10.dp))
-                                    Icon(Icons.Default.Refresh, stringResource(R.string.refresh))
-                                }
+                            Button(
+                                onClick = {
+                                    viewModel.onEvent(MenuEvent.FetchMenu())
+                                },
+                                colors = ButtonDefaults.secondaryButtonColors(),
+                                enabled = hasInternet
+                            ) {
+                                Spacer(Modifier.height(10.dp))
+                                Icon(Icons.Default.Refresh, stringResource(R.string.refresh))
                             }
                         }
 
