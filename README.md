@@ -4,11 +4,11 @@
 Menu is a Wear OS app for seeing, ordering school canteen food using iCanteen by [Z-WARE](https://www.z-ware.cz/)
 
 ## Features
-- Seeing food, including allergens and order timing
-- Ordering food (if logged in)
-- Also works offline
-- Custom server (defaults to `https://jidelnicek.roznovskastredni.cz`)
-- Chose which food types u want to see
+- View food items, including allergens and order timing.
+- Place food orders (requires logging in).
+- Works offline as well.
+- Customizable server (defaults to `https://jidelnicek.roznovskastredni.cz`).
+- Choose which food types you want to see.
 
 ## Installation
 1. Download the APK from the latest [release](https://github.com/Ev357/Menu/releases).
