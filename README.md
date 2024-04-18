@@ -1,7 +1,7 @@
 ![Menu](app/src/main/ic_launcher-playstore.png)
 
 # Menu
-Menu is a Wear OS app for seeing, ordering school canteen food using iCanteen by [Z-WARE](https://www.z-ware.cz/)
+Menu is a Wear OS app for seeing, ordering school canteen food using [iCanteen](https://www.nasejidelna.cz).
 
 ## Features
 - View food items, including allergens and order timing.
