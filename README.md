@@ -27,12 +27,9 @@ Menu is a Wear OS app for seeing, ordering school canteen food using iCanteen by
 _There are sure other ways to do so, but i think this one is the most user friendly one. Also the app is dope XD._
 
 ## Examples
-![Screenshot_20240418_193706](https://github.com/Ev357/Menu/assets/113623019/4203a51c-796e-402c-9fb6-6cd36c7738b4)
-![Screenshot_20240418_193748](https://github.com/Ev357/Menu/assets/113623019/52a956c4-5e90-44e8-9d51-cf9e6af00558)
-![Screenshot_20240418_193803](https://github.com/Ev357/Menu/assets/113623019/3a2c5592-ac96-4ffd-81cd-84907f5298d0)
-![Screenshot_20240418_193812](https://github.com/Ev357/Menu/assets/113623019/5dd9b357-158c-4c02-9f19-e69581d6b276)
-![Screenshot_20240418_194320](https://github.com/Ev357/Menu/assets/113623019/d925a8f3-497c-4266-8eaf-32ee59ea7919)
-![Screenshot_20240418_193853](https://github.com/Ev357/Menu/assets/113623019/74fe2be1-a67c-499a-ace2-4025e29f18fa)
+![Screenshot_20240418_193706](https://github.com/Ev357/Menu/assets/113623019/4203a51c-796e-402c-9fb6-6cd36c7738b4) ![Screenshot_20240418_193748](https://github.com/Ev357/Menu/assets/113623019/52a956c4-5e90-44e8-9d51-cf9e6af00558)
+![Screenshot_20240418_193803](https://github.com/Ev357/Menu/assets/113623019/3a2c5592-ac96-4ffd-81cd-84907f5298d0) ![Screenshot_20240418_193812](https://github.com/Ev357/Menu/assets/113623019/5dd9b357-158c-4c02-9f19-e69581d6b276)
+![Screenshot_20240418_194320](https://github.com/Ev357/Menu/assets/113623019/d925a8f3-497c-4266-8eaf-32ee59ea7919) ![Screenshot_20240418_193853](https://github.com/Ev357/Menu/assets/113623019/74fe2be1-a67c-499a-ace2-4025e29f18fa)
 
 ## Notes
 - Regarding the functionality that's been logged: I've made efforts to secure it, but please be aware that this is my first Kotlin project. While I've tried to ensure security, I can't guarantee it's completely foolproof. Please proceed at your own discretion. However, based on my understanding, it should be satisfactory.
