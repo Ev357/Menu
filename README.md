@@ -36,3 +36,4 @@ _There are sure other ways to do so, but i think this one is the most user frien
 - As mentioned earlier, this is my inaugural project, and I acknowledge that the code isn't optimal. I'm open to suggestions for improvement or learning opportunities.
 - Additionally, while logged in, I recommend waiting for everything to to load before doing any orders. There might be some bugs, especially on devices with low performance or slow network speeds, although it should generally function without issue.
 - The app functions by simulating a browser and extracting data from HTML, including the logging process. Unfortunately, the APIs used are not publicly accessible.
+- This app currently functions on the default server. I cannot guarantee it will work flawlessly for all canteens. If you encounter any bugs, please feel free to report them.
