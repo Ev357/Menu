@@ -24,7 +24,7 @@ Menu is a Wear OS app for seeing, ordering school canteen food using iCanteen by
 6. Connect the app to your watch, then select the APK file you downloaded earlier and click "INSTALL APK FILE".
 7. Enjoy the app :DD
 
-_There are sure other ways to do so, but i think this one is the most user friendly. Also the app is dope XD._
+_There are sure other ways to do so, but i think this one is the most user friendly one. Also the app is dope XD._
 
 ## Examples
 ![Screenshot_20240418_193706](https://github.com/Ev357/Menu/assets/113623019/4203a51c-796e-402c-9fb6-6cd36c7738b4)
