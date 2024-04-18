@@ -1,20 +1,28 @@
 ![Menu](app/src/main/ic_launcher-playstore.png)
 
 # Menu
-Menu is a Wear OS app for seeing, ordering school cafeteria food using iCanteen by [Z-WARE](https://www.z-ware.cz/)
+Menu is a Wear OS app for seeing, ordering school canteen food using iCanteen by [Z-WARE](https://www.z-ware.cz/)
 
 ## Features
 - Seeing food, including allergens and order timing
 - Ordering food (if logged in)
 - Also works offline
 - Custom server (defaults to `https://jidelnicek.roznovskastredni.cz`)
-- Custom food preferences
+- Chose which food types u want to see
 
 ## Installation
 1. Download the APK from the latest [release](https://github.com/Ev357/Menu/releases).
 2. Install an app that allows sideloading the APK to your watch. I recommend using [GeminiMan WearOS Manager](https://play.google.com/store/apps/details?id=com.geminiman.wearosmanager).
-3. I reccomend following the guide provided by the developer itself. You can find it [here](https://www.youtube.com/watch?v=wNANot-4PPU).
-4. Connect the app to your watch, then select the APK file you downloaded earlier and click "INSTALL APK FILE".
+3. I recommend following the the in-app guide. You can find it under the `Help` button.
+
+![Screenshot_2024-04-18-20-36-31-158_com geminiman wearosmanager](https://github.com/Ev357/Menu/assets/113623019/b25d28d2-3adf-4005-bd76-f4c41b808b52)
+
+5. Additionally, I suggest enabling `Disable Automatic Wi-Fi` in the `Developer options` on your watch to prevent interruptions during installation. Remember to disable this setting after installation, as it may cause increased battery drain.
+
+![Screenshot_20240418_205513](https://github.com/Ev357/Menu/assets/113623019/70dacee6-cd83-4004-8ce5-4244d3171382)
+
+6. Connect the app to your watch, then select the APK file you downloaded earlier and click "INSTALL APK FILE".
+7. Enjoy the app :DD
 
 _There are sure other ways to do so, but i think this one is the most user friendly. Also the app is dope XD._
 
