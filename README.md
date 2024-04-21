@@ -32,7 +32,7 @@ _There are sure other ways to do so, but i think this one is the most user frien
 ![Screenshot_20240418_194320](https://github.com/Ev357/Menu/assets/113623019/d925a8f3-497c-4266-8eaf-32ee59ea7919) ![Screenshot_20240418_193853](https://github.com/Ev357/Menu/assets/113623019/74fe2be1-a67c-499a-ace2-4025e29f18fa)
 
 ## Notes
-- Regarding the functionality that's been logged: I've made efforts to secure it, but please be aware that this is my first Kotlin project. While I've tried to ensure security, I can't guarantee it's completely foolproof. Please proceed at your own discretion. However, based on my understanding, it should be satisfactory.
+- Regarding the functionality related to account login: I've made efforts to secure it, but please be aware that this is my first Kotlin project. While I've tried to ensure security, I can't guarantee it's completely foolproof. Please proceed at your own discretion. However, based on my understanding, it should be satisfactory.
 - As mentioned earlier, this is my inaugural project, and I acknowledge that the code isn't optimal. I'm open to suggestions for improvement or learning opportunities.
 - Additionally, while logged in, I recommend waiting for everything to to load before doing any orders. There might be some bugs, especially on devices with low performance or slow network speeds, although it should generally function without issue.
 - The app functions by simulating a browser and extracting data from HTML, including the logging process. Unfortunately, the APIs used are not publicly accessible.
